@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "/Users/frederickoctoramadhan/.config/herd-lite/bin/php",
+            "args": [
+                "/Users/frederickoctoramadhan/Documents/github/c2c_website/artisan",
+                "boost:mcp"
+            ]
+        }
+    }
+}
