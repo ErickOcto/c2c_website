@@ -3,32 +3,57 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Fortify\TwoFactorAuthenticatable;
 
 #[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
+#[Hidden(['password', 'remember_token'])]
+
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    public function profile()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'two_factor_confirmed_at' => 'datetime',
-        ];
+        return $this->hasOne(Profile::class);
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class); // sebagai seller
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'buyer_id');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function wishlist()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function cart()
+    {
+        return $this->hasOne(Cart::class);
+    }
+
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id');
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
     }
 }
