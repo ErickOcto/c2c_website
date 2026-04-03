@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Models;
-
+namespace Modules\Cart\Models;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Wishlist extends Model

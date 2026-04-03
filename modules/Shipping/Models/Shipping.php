@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace Modules\Shipping\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Modules\Order\Models\Order;
 
 class Shipping extends Model
 {

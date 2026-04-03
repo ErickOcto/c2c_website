@@ -24,6 +24,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        foreach (glob(base_path('modules/*/Database/Migrations'), GLOB_ONLYDIR) as $path) {
+            $this->loadMigrationsFrom($path);
+        }
     }
 
     /**

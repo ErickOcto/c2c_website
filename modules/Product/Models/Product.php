@@ -1,8 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace Modules\Product\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Cart\Models\Wishlist;
+use Modules\Feedback\Models\Review;
 
 class Product extends Model
 {
