@@ -6,8 +6,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { PlusSignCircleIcon, Mail01Icon } from "@hugeicons/core-free-icons"
 import { Link, usePage } from "@inertiajs/react"
 
 export function NavMain({
@@ -35,6 +33,7 @@ export function NavMain({
                   asChild
                   tooltip={item.title}
                   isActive={isActive}
+                  className="data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[active=true]:hover:bg-primary/90 data-[active=true]:hover:text-primary-foreground"
                 >
                   <Link href={item.url}>
                     {item.icon}
@@ -49,4 +48,3 @@ export function NavMain({
     </SidebarGroup>
   )
 }
-
