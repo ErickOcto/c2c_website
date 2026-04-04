@@ -2,7 +2,7 @@
 
 namespace Modules\Dispute\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class DisputeMessageController extends Controller
 {
