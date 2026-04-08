@@ -4,32 +4,64 @@ namespace Modules\Product\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Cart\Models\Wishlist;
 use Modules\Feedback\Models\Review;
 
 class Product extends Model
 {
-    public function seller()
+    protected $fillable = [
+        'user_id',
+        'category_id',
+        'name',
+        'description',
+        'brand',
+        'condition',
+        'size',
+        'color',
+        'material',
+        'price',
+        'stock',
+        'status',
+    ];
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function seller(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function category()
+    /**
+     * @return BelongsTo<Category, $this>
+     */
+    public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    public function images()
+    /**
+     * @return HasMany<ProductImage, $this>
+     */
+    public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
     }
 
-    public function reviews()
+    /**
+     * @return HasMany<Review, $this>
+     */
+    public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
     }
 
-    public function wishlistedBy()
+    /**
+     * @return HasMany<Wishlist, $this>
+     */
+    public function wishlistedBy(): HasMany
     {
         return $this->hasMany(Wishlist::class);
     }

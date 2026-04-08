@@ -3,15 +3,25 @@
 namespace Modules\Cart\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Product\Models\Product;
 
 class CartItem extends Model
 {
-    public function cart()
+    protected $fillable = ['cart_id', 'product_id', 'quantity', 'size'];
+
+    /**
+     * @return BelongsTo<Cart, $this>
+     */
+    public function cart(): BelongsTo
     {
         return $this->belongsTo(Cart::class);
     }
 
-    public function product()
+    /**
+     * @return BelongsTo<Product, $this>
+     */
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
