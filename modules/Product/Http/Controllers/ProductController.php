@@ -86,6 +86,10 @@ class ProductController extends Controller
             $query->where('category_id', $request->input('category'));
         }
 
+        if ($request->filled('department')) {
+            $query->where('department', $request->input('department'));
+        }
+
         if ($request->filled('condition')) {
             $query->where('condition', $request->input('condition'));
         }
@@ -120,7 +124,7 @@ class ProductController extends Controller
         return Inertia::render('search', [
             'products' => $products,
             'categories' => $categories,
-            'filters' => $request->only(['q', 'category', 'condition', 'min_price', 'max_price', 'size', 'brand', 'sort']),
+            'filters' => $request->only(['q', 'department', 'category', 'condition', 'min_price', 'max_price', 'size', 'brand', 'sort']),
         ]);
     }
 }

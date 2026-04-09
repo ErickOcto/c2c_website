@@ -56,6 +56,7 @@ class DatabaseSeeder extends Seeder
                 'size' => 'M',
                 'color' => 'Blue',
                 'material' => 'Denim',
+                'department' => 'men',
                 'category_id' => 4,
                 'user_id' => 2,
             ],
@@ -68,6 +69,7 @@ class DatabaseSeeder extends Seeder
                 'size' => 'S',
                 'color' => 'Pink',
                 'material' => 'Silk',
+                'department' => 'women',
                 'category_id' => 1,
                 'user_id' => 2,
             ],
@@ -80,6 +82,7 @@ class DatabaseSeeder extends Seeder
                 'size' => 'L',
                 'color' => 'Black',
                 'material' => 'Polyester',
+                'department' => 'women',
                 'category_id' => 2,
                 'user_id' => 3,
             ],
@@ -345,6 +348,16 @@ class DatabaseSeeder extends Seeder
                     'sender_id' => 2,
                     'message' => 'Please provide proof',
                 ],
+            ]);
+        }
+
+        for ($i = 1; $i <= 5; $i++) {
+            DB::table('user_otps')->insert([
+                'user_id' => $i,
+                'code' => sprintf('%06d', rand(0, 999999)),
+                'expires_at' => Carbon::now()->addMinutes(10),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ]);
         }
     }

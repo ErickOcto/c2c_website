@@ -32,6 +32,7 @@ import {
 
 type Filters = {
     q?: string;
+    department?: string;
     category?: string;
     condition?: string;
     min_price?: string;
@@ -307,6 +308,14 @@ export default function SearchPage({
                                     setSearchQuery('');
                                     applyFilters({ ...localFilters, q: '' });
                                 }}>
+                                    <X className="h-3 w-3" />
+                                </button>
+                            </Badge>
+                        )}
+                        {localFilters.department && (
+                            <Badge variant="secondary" className="gap-1 capitalize">
+                                {localFilters.department}
+                                <button onClick={() => clearFilter('department')}>
                                     <X className="h-3 w-3" />
                                 </button>
                             </Badge>

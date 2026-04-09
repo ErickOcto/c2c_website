@@ -33,15 +33,11 @@ import { useInitials } from '@/hooks/use-initials';
 import { router } from '@inertiajs/react';
 import notifications from '@/routes/notifications';
 
-const categories = [
-    { name: 'Tops', slug: 'tops' },
-    { name: 'Bottoms', slug: 'bottoms' },
-    { name: 'Dresses', slug: 'dresses' },
-    { name: 'Outerwear', slug: 'outerwear' },
-    { name: 'Shoes', slug: 'shoes' },
-    { name: 'Bags', slug: 'bags' },
-    { name: 'Accessories', slug: 'accessories' },
-    { name: 'Activewear', slug: 'activewear' },
+const departments = [
+    { name: 'Unisex', slug: 'unisex' },
+    { name: 'Men', slug: 'men' },
+    { name: 'Women', slug: 'women' },
+    { name: 'Kids', slug: 'kids' },
 ];
 
 export function StorefrontHeader() {
@@ -102,14 +98,14 @@ export function StorefrontHeader() {
                                     </Link>
                                 </SheetHeader>
                                 <nav className="flex flex-col gap-1 pt-4">
-                                    {categories.map((cat) => (
+                                    {departments.map((dept) => (
                                         <Link
-                                            key={cat.slug}
-                                            href={`/search?category=${cat.slug}`}
+                                            key={dept.slug}
+                                            href={`/search?department=${dept.slug}`}
                                             className="px-3 py-2.5 text-sm font-medium rounded-md hover:bg-accent transition-colors"
                                             onClick={() => setMobileMenuOpen(false)}
                                         >
-                                            {cat.name}
+                                            {dept.name}
                                         </Link>
                                     ))}
                                 </nav>
@@ -126,13 +122,13 @@ export function StorefrontHeader() {
 
                         {/* Category nav — desktop */}
                         <nav className="hidden lg:flex items-center gap-1">
-                            {categories.map((cat) => (
+                            {departments.map((dept) => (
                                 <Link
-                                    key={cat.slug}
-                                    href={`/search?category=${cat.slug}`}
+                                    key={dept.slug}
+                                    href={`/search?department=${dept.slug}`}
                                     className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent"
                                 >
-                                    {cat.name}
+                                    {dept.name}
                                 </Link>
                             ))}
                         </nav>

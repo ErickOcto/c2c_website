@@ -26,6 +26,7 @@ export type Product = {
     size: string | null;
     color: string | null;
     material: string | null;
+    department?: 'men' | 'women' | 'kids' | 'unisex';
     price: number;
     stock: number;
     status: 'active' | 'inactive' | 'sold' | 'deleted';
