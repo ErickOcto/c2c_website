@@ -36,6 +36,7 @@ export type Product = {
     seller?: ProductSeller;
     reviews?: Review[];
     reviews_count?: number;
+    is_wishlisted?: boolean;
 };
 
 export type ProductSeller = {

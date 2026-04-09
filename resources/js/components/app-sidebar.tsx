@@ -1,6 +1,5 @@
 import * as React from "react"
 
-import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
@@ -12,23 +11,53 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarGroup,
+  SidebarGroupLabel,
 } from "@/components/ui/sidebar"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { DashboardSquare01Icon, Camera01Icon, File01Icon, Settings05Icon, HelpCircleIcon, SearchIcon, Database01Icon, Analytics01Icon, BabyBoyDressIcon } from "@hugeicons/core-free-icons"
-import { Link } from "@inertiajs/react"
+import {
+  DashboardSquare01Icon,
+  Settings05Icon,
+  HelpCircleIcon,
+  SearchIcon,
+  BabyBoyDressIcon,
+  ShoppingBag02Icon,
+  Package01Icon,
+  DeliveryTruck01Icon,
+  AnalyticsUpIcon,
+} from "@hugeicons/core-free-icons"
+import { Link, usePage } from "@inertiajs/react"
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Dashboard",
       url: "/dashboard",
       icon: (
         <HugeiconsIcon icon={DashboardSquare01Icon} strokeWidth={2} />
+      ),
+    },
+  ],
+  sellerNav: [
+    {
+      title: "Seller Dashboard",
+      url: "/seller/dashboard",
+      icon: (
+        <HugeiconsIcon icon={AnalyticsUpIcon} strokeWidth={2} />
+      ),
+    },
+    {
+      title: "My Products",
+      url: "/seller/products",
+      icon: (
+        <HugeiconsIcon icon={Package01Icon} strokeWidth={2} />
+      ),
+    },
+    {
+      title: "Orders",
+      url: "/seller/orders",
+      icon: (
+        <HugeiconsIcon icon={ShoppingBag02Icon} strokeWidth={2} />
       ),
     },
   ],
@@ -55,32 +84,11 @@ const data = {
       ),
     },
   ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "/data-library",
-      icon: (
-        <HugeiconsIcon icon={Database01Icon} strokeWidth={2} />
-      ),
-    },
-    {
-      name: "Reports",
-      url: "/reports",
-      icon: (
-        <HugeiconsIcon icon={Analytics01Icon} strokeWidth={2} />
-      ),
-    },
-    {
-      name: "Word Assistant",
-      url: "/word-assistant",
-      icon: (
-        <HugeiconsIcon icon={File01Icon} strokeWidth={2} />
-      ),
-    },
-  ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { auth } = usePage().props as any;
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -100,13 +108,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
+
+        {/* Seller Section */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Seller</SidebarGroupLabel>
+          <NavMain items={data.sellerNav} />
+        </SidebarGroup>
+
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={auth?.user ?? { name: 'User', email: 'user@example.com', avatar: '' }} />
       </SidebarFooter>
     </Sidebar>
   )
 }
-

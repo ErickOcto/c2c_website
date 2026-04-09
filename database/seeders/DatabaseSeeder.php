@@ -245,10 +245,14 @@ class DatabaseSeeder extends Seeder
 
         for ($i = 1; $i <= 5; $i++) {
             DB::table('notifications')->insert([
-                'user_id' => 1,
-                'title' => 'Notif '.$i,
-                'content' => 'Content '.$i,
-                'is_read' => false,
+                'id' => \Illuminate\Support\Str::uuid(),
+                'type' => 'App\Notifications\SystemNotification',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => 1,
+                'data' => json_encode(['title' => 'Notif '.$i, 'message' => 'Content '.$i]),
+                'read_at' => null,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ]);
         }
 

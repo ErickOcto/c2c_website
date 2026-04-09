@@ -37,9 +37,14 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $cartItemCount = 0;
+        $unreadNotificationsCount = 0;
+        $recentNotifications = [];
+        
         if ($request->user()) {
             $cart = Cart::where('user_id', $request->user()->id)->first();
             $cartItemCount = $cart ? $cart->items()->count() : 0;
+            $unreadNotificationsCount = $request->user()->unreadNotifications()->count();
+            $recentNotifications = $request->user()->notifications()->take(5)->get();
         }
 
         return [
@@ -47,6 +52,8 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
+                'unreadNotificationsCount' => $unreadNotificationsCount,
+                'recentNotifications' => $recentNotifications,
             ],
             'cartItemCount' => $cartItemCount,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',

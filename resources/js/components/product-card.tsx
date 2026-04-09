@@ -2,14 +2,20 @@ import type { Product } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from '@inertiajs/react';
-import { Star } from 'lucide-react';
+import { Heart, Star } from 'lucide-react';
 import { ConditionBadge } from '@/components/condition-badge';
+import { router, usePage } from '@inertiajs/react';
+import { cn } from '@/lib/utils';
+import wishlist from '@/routes/wishlist';
+import { login } from '@/routes';
 
 type Props = {
     product: Product;
 };
 
 export function ProductCard({ product }: Props) {
+    const { auth } = usePage().props as any;
+
     const averageRating =
         product.reviews && product.reviews.length > 0
             ? product.reviews.reduce((sum, r) => sum + r.rating, 0) /
@@ -24,9 +30,20 @@ export function ProductCard({ product }: Props) {
         }).format(price);
     };
 
+    const toggleWishlist = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!auth.user) {
+            router.get(login.url());
+            return;
+        }
+
+        router.post(wishlist.toggle.url({ product: product.id }), {}, { preserveScroll: true });
+    };
+
     return (
         <Link href={`/products/${product.id}`} className="group block">
-            <Card className="overflow-hidden border-0 bg-card shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+            <Card className="overflow-hidden border-0 bg-card shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative">
                 <div className="relative aspect-3/4 overflow-hidden bg-muted">
                     <img
                         src={
@@ -39,17 +56,23 @@ export function ProductCard({ product }: Props) {
                     <div className="absolute top-3 left-3">
                         <ConditionBadge condition={product.condition} />
                     </div>
-                    {product.brand && (
-                        <div className="absolute top-3 right-3">
-                            <Badge
-                                variant="secondary"
-                                className="bg-background/80 backdrop-blur-sm text-xs font-medium"
-                            >
-                                {product.brand}
-                            </Badge>
-                        </div>
-                    )}
                 </div>
+
+                <button
+                    onClick={toggleWishlist}
+                    className="absolute top-3 right-3 z-10 p-2 rounded-full bg-background/80 hover:bg-background/95 backdrop-blur-sm transition-colors shadow-sm"
+                    aria-label="Toggle wishlist"
+                >
+                    <Heart
+                        className={cn(
+                            "h-5 w-5 transition-colors",
+                            product.is_wishlisted 
+                                ? "fill-rose-500 text-rose-500" 
+                                : "text-muted-foreground hover:text-foreground"
+                        )}
+                    />
+                </button>
+
                 <CardContent className="p-4">
                     <p className="text-xs text-muted-foreground mb-1">
                         {product.category?.name}

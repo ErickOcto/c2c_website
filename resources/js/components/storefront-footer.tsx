@@ -12,7 +12,7 @@ export function StorefrontFooter() {
                             href="/"
                             className="text-xl font-bold font-heading tracking-tight"
                         >
-                            Pre<span className="text-primary">Loved</span>
+                            C2C<span className="text-primary"> Marketplace</span>
                         </Link>
                         <p className="text-sm text-muted-foreground leading-relaxed">
                             Give your pre-loved fashion a second life.
@@ -85,7 +85,7 @@ export function StorefrontFooter() {
 
                 <div className="border-t border-border mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p className="text-xs text-muted-foreground">
-                        © {new Date().getFullYear()} PreLoved. All rights reserved.
+                        © {new Date().getFullYear()} C2C. All rights reserved.
                     </p>
                     <p className="text-xs text-muted-foreground flex items-center gap-1">
                         Made with <Heart className="h-3 w-3 fill-red-500 text-red-500" /> for sustainable fashion

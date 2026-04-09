@@ -6,9 +6,10 @@ import {
     Menu,
     X,
     Heart,
+    Bell,
     User,
     LogIn,
-} from 'lucide-react';
+    Check} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -18,6 +19,8 @@ import {
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
+    DropdownMenuGroup,
+    DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import {
     Sheet,
@@ -27,6 +30,8 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { useInitials } from '@/hooks/use-initials';
+import { router } from '@inertiajs/react';
+import notifications from '@/routes/notifications';
 
 const categories = [
     { name: 'Tops', slug: 'tops' },
@@ -41,7 +46,11 @@ const categories = [
 
 export function StorefrontHeader() {
     const { auth, cartItemCount } = usePage<{
-        auth: { user: { id: number; name: string; email: string; avatar?: string } | null };
+        auth: { 
+            user: { id: number; name: string; email: string; avatar?: string } | null;
+            unreadNotificationsCount: number;
+            recentNotifications: any[];
+        };
         cartItemCount: number;
     }>().props;
     const getInitials = useInitials();
@@ -53,6 +62,14 @@ export function StorefrontHeader() {
         if (searchQuery.trim()) {
             window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`;
         }
+    }
+
+    function markNotificationAsRead(id: string) {
+        router.patch(notifications.markRead.url({ id }), {}, { preserveScroll: true });
+    }
+
+    function markAllAsRead() {
+        router.post(notifications.markAllRead.url(), {}, { preserveScroll: true });
     }
 
     return (
@@ -81,7 +98,7 @@ export function StorefrontHeader() {
                                 <SheetTitle className="sr-only">Navigation</SheetTitle>
                                 <SheetHeader className="text-left pb-4 border-b">
                                     <Link href="/" className="text-xl font-bold font-heading tracking-tight">
-                                        Pre<span className="text-primary">Loved</span>
+                                        C2C<span className="text-primary"> Marketplace</span>
                                     </Link>
                                 </SheetHeader>
                                 <nav className="flex flex-col gap-1 pt-4">
@@ -104,7 +121,7 @@ export function StorefrontHeader() {
                             href="/"
                             className="shrink-0 text-xl font-bold font-heading tracking-tight"
                         >
-                            Pre<span className="text-primary">Loved</span>
+                            C2C<span className="text-primary"> Marketplace</span>
                         </Link>
 
                         {/* Category nav — desktop */}
@@ -149,11 +166,57 @@ export function StorefrontHeader() {
                                 </Button>
                             </Link>
 
+                            {/* Notifications */}
+                            {auth.user && (
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="relative h-9 w-9 hidden sm:flex">
+                                            <Bell className="h-5 w-5" />
+                                            {auth.unreadNotificationsCount > 0 && (
+                                                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] font-bold bg-primary text-primary-foreground">
+                                                    {auth.unreadNotificationsCount > 9 ? '9+' : auth.unreadNotificationsCount}
+                                                </Badge>
+                                            )}
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-80">
+                                        <DropdownMenuLabel className="flex justify-between items-center px-4 py-2">
+                                            <span className="font-semibold text-sm">Notifications</span>
+                                            {auth.unreadNotificationsCount > 0 && (
+                                                <Button variant="ghost" size="sm" className="h-auto p-1 text-xs text-muted-foreground hover:text-primary" onClick={markAllAsRead}>
+                                                    Mark all as read
+                                                </Button>
+                                            )}
+                                        </DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        <div className="max-h-[300px] overflow-y-auto">
+                                            {auth.recentNotifications && auth.recentNotifications.length > 0 ? (
+                                                auth.recentNotifications.map((notif: any) => (
+                                                    <div key={notif.id} className={`flex flex-col gap-1 p-3 border-b border-border/50 transition-colors hover:bg-muted/50 cursor-pointer ${notif.read_at ? 'opacity-70' : 'bg-primary/5'}`} onClick={() => !notif.read_at && markNotificationAsRead(notif.id)}>
+                                                        <div className="flex justify-between items-start">
+                                                            <span className="text-sm font-medium leading-tight">{notif.data?.title || 'Notification'}</span>
+                                                            {!notif.read_at && <span className="h-2 w-2 rounded-full bg-primary mt-1 shrink-0" />}
+                                                        </div>
+                                                        <span className="text-xs text-muted-foreground line-clamp-2">{notif.data?.message || 'You have a new message'}</span>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="p-6 text-center text-sm text-muted-foreground">
+                                                    No recent notifications.
+                                                </div>
+                                            )}
+                                        </div>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            )}
+
                             {/* Wishlist */}
                             {auth.user && (
-                                <Button variant="ghost" size="icon" className="h-9 w-9 hidden sm:flex">
-                                    <Heart className="h-5 w-5" />
-                                </Button>
+                                <Link href="/wishlist">
+                                    <Button variant="ghost" size="icon" className="h-9 w-9 hidden sm:flex">
+                                        <Heart className="h-5 w-5" />
+                                    </Button>
+                                </Link>
                             )}
 
                             {/* Cart */}
