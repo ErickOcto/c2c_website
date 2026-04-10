@@ -3,7 +3,6 @@ import type { Product } from '@/types';
 import { ProductCard } from '@/components/product-card';
 import { HeartCrack, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import StorefrontLayout from '@/layouts/storefront-layout';
 
 type WishlistProps = {
     wishlists: {
@@ -21,7 +20,7 @@ export default function WishlistPage({ wishlists }: WishlistProps) {
     const items = wishlists.data;
 
     return (
-        <StorefrontLayout>
+        <>
             <Head title="My Wishlist" />
 
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:py-10">
@@ -30,7 +29,7 @@ export default function WishlistPage({ wishlists }: WishlistProps) {
                 </h1>
 
                 {items.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
                         {items.map((item) => (
                             <ProductCard
                                 key={item.product.id}
@@ -59,7 +58,7 @@ export default function WishlistPage({ wishlists }: WishlistProps) {
                     </div>
                 )}
             </div>
-        </StorefrontLayout>
+        </>
     );
 }
 

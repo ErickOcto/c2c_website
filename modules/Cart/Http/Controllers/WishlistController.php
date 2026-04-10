@@ -22,7 +22,7 @@ class WishlistController extends Controller
             ->latest()
             ->paginate(12);
 
-        return Inertia::render('wishlist/index', [
+        return Inertia::render('wishlist', [
             'wishlists' => $wishlists,
         ]);
     }

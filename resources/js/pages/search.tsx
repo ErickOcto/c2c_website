@@ -431,14 +431,14 @@ export default function SearchPage({
 
                         {/* Product Grid / Skeletons */}
                         {isLoading ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                                 {Array.from({ length: 8 }, (_, i) => (
                                     <ProductCardSkeleton key={i} />
                                 ))}
                             </div>
                         ) : products.data.length > 0 ? (
                             <>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                                     {products.data.map((product) => (
                                         <ProductCard
                                             key={product.id}

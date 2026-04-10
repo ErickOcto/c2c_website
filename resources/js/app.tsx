@@ -6,7 +6,7 @@ import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import StorefrontLayout from '@/layouts/storefront-layout';
 
-const appName = import.meta.env.VITE_APP_NAME || 'C2C';
+const appName = import.meta.env.VITE_APP_NAME || 'C2C Marketplace';
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
@@ -15,6 +15,7 @@ createInertiaApp({
             case name === 'welcome':
             case name === 'search':
             case name === 'cart':
+            case name === 'wishlist':
             case name.startsWith('products/'):
                 return StorefrontLayout;
             case name.startsWith('auth/'):

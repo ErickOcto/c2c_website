@@ -89,7 +89,7 @@ export default function SellerDashboard({ kpis, monthlyRevenue, recentOrders }: 
 
                         {/* KPI Cards */}
                         <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-                            <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs dark:bg-card">
+                            <Card className="@container/card bg-linear-to-t from-primary/5 to-card shadow-xs dark:bg-card">
                                 <CardHeader>
                                     <CardDescription className="flex items-center gap-2">
                                         <HugeiconsIcon icon={ShoppingBag02Icon} strokeWidth={2} className="size-4" />
@@ -111,7 +111,7 @@ export default function SellerDashboard({ kpis, monthlyRevenue, recentOrders }: 
                                 </CardFooter>
                             </Card>
 
-                            <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs dark:bg-card">
+                            <Card className="@container/card bg-linear-to-t from-primary/5 to-card shadow-xs dark:bg-card">
                                 <CardHeader>
                                     <CardDescription className="flex items-center gap-2">
                                         <HugeiconsIcon icon={MoneyBag02Icon} strokeWidth={2} className="size-4" />
@@ -134,7 +134,7 @@ export default function SellerDashboard({ kpis, monthlyRevenue, recentOrders }: 
                                 </CardFooter>
                             </Card>
 
-                            <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs dark:bg-card">
+                            <Card className="@container/card bg-linear-to-t from-primary/5 to-card shadow-xs dark:bg-card">
                                 <CardHeader>
                                     <CardDescription className="flex items-center gap-2">
                                         <HugeiconsIcon icon={DeliveryTruck01Icon} strokeWidth={2} className="size-4" />
@@ -156,7 +156,7 @@ export default function SellerDashboard({ kpis, monthlyRevenue, recentOrders }: 
                                 </CardFooter>
                             </Card>
 
-                            <Card className="@container/card bg-gradient-to-t from-primary/5 to-card shadow-xs dark:bg-card">
+                            <Card className="@container/card bg-linear-to-t from-primary/5 to-card shadow-xs dark:bg-card">
                                 <CardHeader>
                                     <CardDescription className="flex items-center gap-2">
                                         <HugeiconsIcon icon={Package01Icon} strokeWidth={2} className="size-4" />
@@ -197,7 +197,7 @@ export default function SellerDashboard({ kpis, monthlyRevenue, recentOrders }: 
                                                     {formatCurrency(item.revenue)}
                                                 </span>
                                                 <div
-                                                    className="w-full rounded-t-md bg-gradient-to-t from-primary/80 to-primary/40 transition-all duration-500"
+                                                    className="w-full rounded-t-md bg-linear-to-t from-primary/80 to-primary/40 transition-all duration-500"
                                                     style={{
                                                         height: `${Math.max((item.revenue / maxRevenue) * 160, 8)}px`,
                                                     }}
