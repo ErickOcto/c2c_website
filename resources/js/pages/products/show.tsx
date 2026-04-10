@@ -392,6 +392,12 @@ export default function ProductShow({ product, relatedProducts }: Props) {
                                                     size="sm"
                                                     variant="outline"
                                                     className="rounded-full text-xs"
+                                                    onClick={() => {
+                                                        router.post('/chat', {
+                                                            receiver_id: product.seller!.id,
+                                                            product_id: product.id,
+                                                        });
+                                                    }}
                                                 >
                                                     <MessageCircle className="h-3.5 w-3.5 mr-1" />
                                                     Chat

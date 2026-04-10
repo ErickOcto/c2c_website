@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Modules\Cart\Models\Cart;
+use Modules\Chat\Models\Conversation;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -39,12 +40,19 @@ class HandleInertiaRequests extends Middleware
         $cartItemCount = 0;
         $unreadNotificationsCount = 0;
         $recentNotifications = [];
+        $unreadMessagesCount = 0;
         
         if ($request->user()) {
             $cart = Cart::where('user_id', $request->user()->id)->first();
             $cartItemCount = $cart ? $cart->items()->count() : 0;
             $unreadNotificationsCount = $request->user()->unreadNotifications()->count();
             $recentNotifications = $request->user()->notifications()->take(5)->get();
+
+            // Count total unread chat messages
+            $conversations = $request->user()->conversations()->with('participants')->get();
+            foreach ($conversations as $conversation) {
+                $unreadMessagesCount += $conversation->unreadCountFor($request->user()->id);
+            }
         }
 
         return [
@@ -56,6 +64,7 @@ class HandleInertiaRequests extends Middleware
                 'recentNotifications' => $recentNotifications,
             ],
             'cartItemCount' => $cartItemCount,
+            'unreadMessagesCount' => $unreadMessagesCount,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

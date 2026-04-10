@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('conversation_user', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('buyer_id')->constrained('users')->cascadeOnDelete();
-            $table->decimal('total_price', 10, 2);
-            $table->enum('status', ['pending', 'paid', 'shipped', 'completed', 'cancelled'])->default('pending');
+            $table->foreignId('conversation_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->timestamp('last_read_at')->nullable();
             $table->timestamps();
+
+            $table->unique(['conversation_id', 'user_id']);
         });
     }
 
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('conversation_user');
     }
 };

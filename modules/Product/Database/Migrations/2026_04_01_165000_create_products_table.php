@@ -17,15 +17,15 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->text('description');
+            $table->string('brand')->nullable();
+            $table->enum('condition', ['new', 'good', 'bad', 'poor'])->default('good');
+            $table->string('size')->nullable();
+            $table->string('color')->nullable();
+            $table->string('material')->nullable();
+            $table->enum('department', ['men', 'women', 'kids', 'unisex'])->default('unisex');
             $table->decimal('price', 10, 2);
             $table->integer('stock');
             $table->enum('status', ['active', 'inactive', 'sold', 'deleted'])->default('active');
-            $table->string('brand')->nullable()->after('description');
-            $table->enum('condition', ['new', 'good', 'bad', 'poor'])->default('good')->after('brand');
-            $table->string('size')->nullable()->after('condition');
-            $table->string('color')->nullable()->after('size');
-            $table->string('material')->nullable()->after('color');            
-            $table->enum('department', ['men', 'women', 'kids', 'unisex'])->default('unisex');
             $table->timestamps();
         });
     }

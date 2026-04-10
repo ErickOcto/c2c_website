@@ -5,6 +5,11 @@ import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import StorefrontLayout from '@/layouts/storefront-layout';
+import { configureEcho } from '@laravel/echo-react';
+
+configureEcho({
+    broadcaster: 'reverb',
+});
 
 const appName = import.meta.env.VITE_APP_NAME || 'C2C Marketplace';
 
@@ -17,6 +22,7 @@ createInertiaApp({
             case name === 'cart':
             case name === 'wishlist':
             case name.startsWith('products/'):
+            case name.startsWith('chat/'):
                 return StorefrontLayout;
             case name.startsWith('auth/'):
                 return AuthLayout;

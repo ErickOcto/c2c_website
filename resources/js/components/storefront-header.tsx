@@ -7,6 +7,7 @@ import {
     X,
     Heart,
     Bell,
+    MessageCircle,
     User,
     LogIn,
     Check} from 'lucide-react';
@@ -41,13 +42,14 @@ const departments = [
 ];
 
 export function StorefrontHeader() {
-    const { auth, cartItemCount } = usePage<{
+    const { auth, cartItemCount, unreadMessagesCount } = usePage<{
         auth: { 
             user: { id: number; name: string; email: string; avatar?: string } | null;
             unreadNotificationsCount: number;
             recentNotifications: any[];
         };
         cartItemCount: number;
+        unreadMessagesCount: number;
     }>().props;
     const getInitials = useInitials();
     const [searchQuery, setSearchQuery] = useState('');
@@ -204,6 +206,20 @@ export function StorefrontHeader() {
                                         </div>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
+                            )}
+
+                            {/* Messages */}
+                            {auth.user && (
+                                <Link href="/chat" className="relative">
+                                    <Button variant="ghost" size="icon" className="h-9 w-9 hidden sm:flex">
+                                        <MessageCircle className="h-5 w-5" />
+                                    </Button>
+                                    {unreadMessagesCount > 0 && (
+                                        <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] font-bold bg-primary text-primary-foreground">
+                                            {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
+                                        </Badge>
+                                    )}
+                                </Link>
                             )}
 
                             {/* Wishlist */}

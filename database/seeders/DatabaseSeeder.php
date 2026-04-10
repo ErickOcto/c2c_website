@@ -238,11 +238,25 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        // Create a conversation between user 1 (buyer) and user 2 (seller)
+        $conversationId = DB::table('conversations')->insertGetId([
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+        DB::table('conversation_user')->insert([
+            ['conversation_id' => $conversationId, 'user_id' => 1, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()],
+            ['conversation_id' => $conversationId, 'user_id' => 2, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()],
+        ]);
+
         for ($i = 1; $i <= 5; $i++) {
             DB::table('messages')->insert([
-                'sender_id' => 1,
-                'receiver_id' => 2,
-                'message' => 'Hello '.$i,
+                'conversation_id' => $conversationId,
+                'sender_id' => $i % 2 === 1 ? 1 : 2,
+                'receiver_id' => $i % 2 === 1 ? 2 : 1,
+                'message' => $i % 2 === 1 ? 'Hi, is this item still available?' : 'Yes it is! Would you like to purchase?',
+                'created_at' => Carbon::now()->addMinutes($i),
+                'updated_at' => Carbon::now()->addMinutes($i),
             ]);
         }
 
