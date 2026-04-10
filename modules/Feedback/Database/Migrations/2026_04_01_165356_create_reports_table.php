@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('reporter_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->text('reason');
+            $table->text('description')->nullable();
             $table->enum('status', ['pending', 'reviewed', 'resolved'])->default('pending');
             $table->timestamps();
         });

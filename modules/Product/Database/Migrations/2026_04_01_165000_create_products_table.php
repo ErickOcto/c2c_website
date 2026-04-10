@@ -20,6 +20,12 @@ return new class extends Migration
             $table->decimal('price', 10, 2);
             $table->integer('stock');
             $table->enum('status', ['active', 'inactive', 'sold', 'deleted'])->default('active');
+            $table->string('brand')->nullable()->after('description');
+            $table->enum('condition', ['new', 'good', 'bad', 'poor'])->default('good')->after('brand');
+            $table->string('size')->nullable()->after('condition');
+            $table->string('color')->nullable()->after('size');
+            $table->string('material')->nullable()->after('color');            
+            $table->enum('department', ['men', 'women', 'kids', 'unisex'])->default('unisex');
             $table->timestamps();
         });
     }

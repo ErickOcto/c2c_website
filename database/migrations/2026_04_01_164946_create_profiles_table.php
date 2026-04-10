@@ -18,6 +18,9 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->string('city')->nullable();
             $table->string('profile_picture')->nullable();
+            $table->date('date_of_birth')->nullable();
+            $table->string('gender')->nullable();
+            $table->string('nationality')->nullable();
             $table->timestamps();
         });
     }
