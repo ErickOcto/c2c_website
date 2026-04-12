@@ -8,7 +8,13 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Modules\Chat\Models\Conversation;
+use Modules\Chat\Models\Message;
 use Modules\Transaction\Models\Transaction;
+use Modules\Order\Models\Order;
+use Modules\Product\Models\Product;
+use Modules\Feedback\Models\Review;
+use Modules\Cart\Models\Wishlist;
+use Modules\Cart\Models\Cart;
 
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]

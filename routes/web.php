@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\OtpVerificationController;
+use App\Http\Controllers\DashboardController as BuyerDashboardController;
 use App\Http\Controllers\Seller\DashboardController;
 use App\Http\Controllers\Seller\OrderController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
@@ -13,7 +14,7 @@ Route::middleware(['auth', 'throttle:6,1'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', [BuyerDashboardController::class, 'index'])->name('dashboard');
 
     // Seller Dashboard Routes
     Route::prefix('seller')->name('seller.')->group(function () {
