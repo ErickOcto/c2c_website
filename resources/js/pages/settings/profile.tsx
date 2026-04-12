@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Transition } from '@headlessui/react';
 import { Form, Head, Link, usePage, router } from '@inertiajs/react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
@@ -28,6 +28,10 @@ type Profile = {
     nationality?: string;
     address?: string;
     city?: string;
+    city_id?: number;
+    province_id?: number;
+    province_name?: string;
+    postal_code?: string;
     profile_picture?: string;
 };
 
@@ -48,6 +52,35 @@ export default function ProfilePage({
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [saved, setSaved] = useState(false);
+
+    // Rajaongkir Dropdown States
+    const [provinces, setProvinces] = useState<{province_id: string, province: string}[]>([]);
+    const [cities, setCities] = useState<{city_id: string, city_name: string, type: string}[]>([]);
+    const [selectedProvinceId, setSelectedProvinceId] = useState<string>(profile?.province_id?.toString() ?? '');
+    const [selectedCityId, setSelectedCityId] = useState<string>(profile?.city_id?.toString() ?? '');
+    const [selectedProvinceName, setSelectedProvinceName] = useState<string>(profile?.province_name ?? '');
+    const [selectedCityName, setSelectedCityName] = useState<string>(profile?.city ?? '');
+
+    // Formatted date for input
+    const dob = profile?.date_of_birth ? profile.date_of_birth.split('T')[0] : '';
+
+    useEffect(() => {
+        fetch('/api/shipping/provinces', { headers: { Accept: 'application/json' } })
+            .then((res) => res.json())
+            .then((data) => setProvinces(data.provinces || []))
+            .catch(() => {});
+    }, []);
+
+    useEffect(() => {
+        if (selectedProvinceId) {
+            fetch(`/api/shipping/cities?province_id=${selectedProvinceId}`, { headers: { Accept: 'application/json' } })
+                .then((res) => res.json())
+                .then((data) => setCities(data.cities || []))
+                .catch(() => {});
+        } else {
+            setCities([]);
+        }
+    }, [selectedProvinceId]);
 
     function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
@@ -180,7 +213,7 @@ export default function ProfilePage({
                                 id="date_of_birth"
                                 name="date_of_birth"
                                 type="date"
-                                defaultValue={profile?.date_of_birth ?? ''}
+                                defaultValue={dob}
                             />
                             <InputError message={errors.date_of_birth} />
                         </div>
@@ -229,15 +262,82 @@ export default function ProfilePage({
                             <InputError message={errors.address} />
                         </div>
 
+                        <input type="hidden" name="province_id" value={selectedProvinceId} />
+                        <input type="hidden" name="province_name" value={selectedProvinceName} />
+                        <input type="hidden" name="city_id" value={selectedCityId} />
+                        <input type="hidden" name="city" value={selectedCityName} />
+
                         <div className="grid gap-2">
-                            <Label htmlFor="city">City</Label>
+                            <Label htmlFor="province">Province</Label>
+                            <Select
+                                value={selectedProvinceId || undefined}
+                                onValueChange={(val) => {
+                                    setSelectedProvinceId(val);
+                                    const prov = provinces.find((p) => p.province_id.toString() === val);
+                                    if (prov) setSelectedProvinceName(prov.province);
+                                    // Reset city when province changes
+                                    setSelectedCityId('');
+                                    setSelectedCityName('');
+                                }}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder={provinces.length > 0 ? "Select province" : "Loading provinces..."} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {provinces.length === 0 && (
+                                        <div className="p-2 text-sm text-muted-foreground text-center">
+                                            No provinces available. Check API key.
+                                        </div>
+                                    )}
+                                    {provinces.map((prov) => (
+                                        <SelectItem key={prov.province_id} value={prov.province_id.toString()}>
+                                            {prov.province}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <InputError message={errors.province_id || errors.province_name} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="city">City / Regency</Label>
+                            <Select
+                                value={selectedCityId || undefined}
+                                onValueChange={(val) => {
+                                    setSelectedCityId(val);
+                                    const city = cities.find((c) => c.city_id.toString() === val);
+                                    if (city) setSelectedCityName(city.city_name);
+                                }}
+                                disabled={!selectedProvinceId}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder={!selectedProvinceId ? 'Select a province first' : (cities.length > 0 ? 'Select city' : 'Loading cities...')} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {cities.length === 0 && selectedProvinceId && (
+                                        <div className="p-2 text-sm text-muted-foreground text-center">
+                                            No cities available.
+                                        </div>
+                                    )}
+                                    {cities.map((city) => (
+                                        <SelectItem key={city.city_id} value={city.city_id.toString()}>
+                                            {city.type} {city.city_name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <InputError message={errors.city_id || errors.city} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="postal_code">Postal Code</Label>
                             <Input
-                                id="city"
-                                name="city"
-                                defaultValue={profile?.city ?? ''}
-                                placeholder="e.g., Bandung"
+                                id="postal_code"
+                                name="postal_code"
+                                defaultValue={profile?.postal_code ?? ''}
+                                placeholder="e.g., 40115"
                             />
-                            <InputError message={errors.city} />
+                            <InputError message={errors.postal_code} />
                         </div>
                     </div>
 

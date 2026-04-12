@@ -202,13 +202,15 @@ export default function CartPage({ cartItems }: Props) {
                                         </span>
                                     </div>
 
-                                    <Button
-                                        className="w-full rounded-lg font-semibold text-base"
-                                        size="lg"
-                                    >
-                                        Proceed to Checkout
-                                        <ArrowRight className="ml-2 h-5 w-5" />
-                                    </Button>
+                                    <Link href="/checkout">
+                                        <Button
+                                            className="w-full rounded-lg font-semibold text-base"
+                                            size="lg"
+                                        >
+                                            Proceed to Checkout
+                                            <ArrowRight className="ml-2 h-5 w-5" />
+                                        </Button>
+                                    </Link>
 
                                     <Link
                                         href="/search"

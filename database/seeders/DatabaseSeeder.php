@@ -36,12 +36,25 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Activewear', 'slug' => 'activewear', 'icon' => 'activewear'],
         ]);
 
+        $cities = [
+            ['name' => 'Jakarta Pusat', 'id' => 152, 'province_id' => 6, 'province' => 'DKI Jakarta', 'postal' => '10110'],
+            ['name' => 'Bandung', 'id' => 23, 'province_id' => 9, 'province' => 'Jawa Barat', 'postal' => '40115'],
+            ['name' => 'Surabaya', 'id' => 444, 'province_id' => 11, 'province' => 'Jawa Timur', 'postal' => '60119'],
+            ['name' => 'Yogyakarta', 'id' => 501, 'province_id' => 5, 'province' => 'DI Yogyakarta', 'postal' => '55281'],
+            ['name' => 'Denpasar', 'id' => 114, 'province_id' => 1, 'province' => 'Bali', 'postal' => '80227'],
+        ];
+
         for ($i = 1; $i <= 5; $i++) {
+            $city = $cities[$i - 1];
             DB::table('profiles')->insert([
                 'user_id' => $i,
-                'phone' => '08123'.$i,
-                'address' => 'Address '.$i,
-                'city' => collect(['Jakarta', 'Bandung', 'Surabaya', 'Yogyakarta', 'Bali'])->get($i - 1),
+                'phone' => '08123' . $i,
+                'address' => 'Jl. Test No. ' . $i,
+                'city' => $city['name'],
+                'city_id' => $city['id'],
+                'province_id' => $city['province_id'],
+                'province_name' => $city['province'],
+                'postal_code' => $city['postal'],
             ]);
         }
 
@@ -190,10 +203,26 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        // Create a single transaction to cover multiple orders
+        $transactionId = DB::table('transactions')->insertGetId([
+            'buyer_id' => 1,
+            'payment_method' => 'midtrans',
+            'payment_status' => 'paid',
+            'snap_token' => 'dummy-snap-token',
+            'gross_amount' => 300000,
+            'paid_at' => Carbon::now(),
+        ]);
+
         for ($i = 1; $i <= 5; $i++) {
             DB::table('orders')->insert([
+                'transaction_id' => $transactionId,
                 'buyer_id' => 1,
+                'seller_id' => 2,
                 'total_price' => 50000,
+                'shipping_courier' => 'jne',
+                'shipping_service' => 'REG',
+                'shipping_cost' => 10000,
+                'shipping_etd' => 2,
                 'status' => 'pending',
             ]);
         }
@@ -204,15 +233,6 @@ class DatabaseSeeder extends Seeder
                 'product_id' => $i,
                 'quantity' => 1,
                 'price' => 10000,
-            ]);
-        }
-
-        for ($i = 1; $i <= 5; $i++) {
-            DB::table('transactions')->insert([
-                'order_id' => $i,
-                'payment_method' => 'midtrans',
-                'payment_status' => 'paid',
-                'paid_at' => Carbon::now(),
             ]);
         }
 

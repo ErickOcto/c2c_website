@@ -20,6 +20,10 @@ class Profile extends Model
         'nationality',
         'address',
         'city',
+        'city_id',
+        'province_id',
+        'province_name',
+        'postal_code',
         'profile_picture',
     ];
 
@@ -30,6 +34,8 @@ class Profile extends Model
     {
         return [
             'date_of_birth' => 'date',
+            'city_id' => 'integer',
+            'province_id' => 'integer',
         ];
     }
 

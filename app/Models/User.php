@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Modules\Chat\Models\Conversation;
+use Modules\Transaction\Models\Transaction;
 
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
@@ -51,6 +52,21 @@ class User extends Authenticatable implements MustVerifyEmail
     public function cart()
     {
         return $this->hasOne(Cart::class);
+    }
+
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
+    }
+
+    public function defaultAddress()
+    {
+        return $this->hasOne(Address::class)->where('is_default', true);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'buyer_id');
     }
 
     public function sentMessages()

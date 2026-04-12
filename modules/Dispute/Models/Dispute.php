@@ -2,7 +2,9 @@
 
 namespace Modules\Dispute\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Order\Models\Order;
 
 class Dispute extends Model
 {

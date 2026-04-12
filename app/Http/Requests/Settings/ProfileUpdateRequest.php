@@ -25,6 +25,10 @@ class ProfileUpdateRequest extends FormRequest
             'nationality' => ['nullable', 'string', 'max:100'],
             'address' => ['nullable', 'string', 'max:500'],
             'city' => ['nullable', 'string', 'max:100'],
+            'city_id' => ['nullable', 'integer'],
+            'province_id' => ['nullable', 'integer'],
+            'province_name' => ['nullable', 'string', 'max:100'],
+            'postal_code' => ['nullable', 'string', 'max:10'],
             'avatar' => ['nullable', 'image', 'max:2048'],
         ];
     }

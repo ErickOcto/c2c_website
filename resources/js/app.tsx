@@ -20,6 +20,7 @@ createInertiaApp({
             case name === 'welcome':
             case name === 'search':
             case name === 'cart':
+            case name === 'checkout':
             case name === 'wishlist':
             case name.startsWith('products/'):
             case name.startsWith('chat/'):

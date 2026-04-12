@@ -96,3 +96,43 @@ export type PaginationLink = {
     label: string;
     active: boolean;
 };
+
+// --- Checkout Types ---
+
+export type Address = {
+    id: number;
+    user_id: number;
+    label: string;
+    recipient_name: string;
+    phone: string;
+    address_line: string;
+    city_id: number;
+    city_name: string;
+    province_id: number;
+    province_name: string;
+    postal_code: string;
+    is_default: boolean;
+    created_at: string;
+    updated_at: string;
+};
+
+export type SellerGroup = {
+    seller_id: number;
+    seller_name: string;
+    seller_city: string;
+    items: CartItemType[];
+    subtotal: number;
+    shipping: null;
+};
+
+export type ShippingService = {
+    service: string;
+    description: string;
+    cost: { value: number; etd: string; note: string }[];
+};
+
+export type ShippingCourierResult = {
+    code: string;
+    name: string;
+    costs: ShippingService[];
+};

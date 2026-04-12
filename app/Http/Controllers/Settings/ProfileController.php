@@ -45,7 +45,8 @@ class ProfileController extends Controller
 
         // Update or create profile
         $profileData = $request->safe()->only([
-            'phone', 'date_of_birth', 'gender', 'nationality', 'address', 'city',
+            'phone', 'date_of_birth', 'gender', 'nationality',
+            'address', 'city', 'city_id', 'province_id', 'province_name', 'postal_code',
         ]);
 
         if (! empty(array_filter($profileData))) {
