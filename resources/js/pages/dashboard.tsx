@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Package, Truck, Clock, CheckCircle2, XCircle } from "lucide-react"
 import type { Product, ProductImage } from "@/types/product"
 import { formatRp } from "@/lib/utils"
@@ -82,6 +83,116 @@ export default function Dashboard({ transactions = [] }: { transactions: Transac
     }
   }
 
+  const renderTransactionList = (filteredTransactions: Transaction[]) => {
+    if (filteredTransactions.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-center border rounded-lg bg-card border-dashed">
+          <Package className="w-12 h-12 text-muted-foreground/50 mb-4" />
+          <h3 className="text-lg font-medium">No purchases found</h3>
+          <p className="text-sm text-muted-foreground max-w-sm mt-1">
+            There are no orders matching this status.
+          </p>
+        </div>
+      )
+    }
+
+    return (
+      <div className="flex flex-col gap-6">
+        {filteredTransactions.map((transaction) => (
+          <Card key={transaction.id} className="overflow-hidden shadow-sm">
+            {/* Transaction Header */}
+            <div className="bg-muted/40 border-b px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-semibold text-foreground">
+                    Order Date: {new Date(transaction.created_at).toLocaleDateString()}
+                  </span>
+                  {getPaymentStatusBadge(transaction.payment_status)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Transaction ID: TXN-{transaction.id}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Total Amount</p>
+                <p className="text-base font-bold">{formatRp(Number(transaction.gross_amount))}</p>
+              </div>
+            </div>
+
+            {/* Orders Within Transaction */}
+            <div className="divide-y">
+              {transaction.orders.map((order) => (
+                <div key={order.id} className="p-6">
+                  {/* Seller & Status */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-sm">Seller: {order.seller.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {getOrderStatusIcon(order.status)}
+                      {getOrderStatusBadge(order.status)}
+                    </div>
+                  </div>
+
+                  {/* Order Items */}
+                  <div className="space-y-4">
+                    {order.items.map((item) => (
+                      <div key={item.id} className="flex gap-4 items-start">
+                        <div className="h-16 w-16 bg-muted rounded-md overflow-hidden shrink-0 border relative">
+                          {item.product.images?.[0] ? (
+                            <img 
+                              src={`/storage/${item.product.images[0].image_url}`} 
+                              alt={item.product.name}
+                              className="object-cover w-full h-full"
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center w-full h-full text-xs text-muted-foreground">
+                              No Image
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium line-clamp-2">{item.product.name}</h4>
+                          <p className="text-sm text-muted-foreground mt-1">{item.quantity} x {formatRp(Number(item.price))}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-sm font-medium">{formatRp(Number(item.price) * item.quantity)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Shipping Info Footer */}
+                  <div className="mt-6 p-4 rounded-md bg-secondary/30 flex items-center justify-between text-sm">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        <Truck className="w-3.5 h-3.5" /> Shipping Courier
+                      </span>
+                      <span className="font-medium">
+                        {order.shipping_courier.toUpperCase()} - {order.shipping_service}
+                      </span>
+                    </div>
+                    <div className="text-right flex flex-col gap-1">
+                      <span className="text-muted-foreground">Shipping Cost</span>
+                      <span className="font-medium">{formatRp(Number(order.shipping_cost))}</span>
+                    </div>
+                  </div>
+                  
+                </div>
+              ))}
+            </div>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
+  // Filters
+  const unpaidTxs = transactions.filter(t => t.payment_status === 'pending')
+  const confirmedTxs = transactions.filter(t => t.payment_status === 'paid' && t.orders.some(o => o.status === 'pending' || o.status === 'processed'))
+  const shippingTxs = transactions.filter(t => t.payment_status === 'paid' && t.orders.some(o => o.status === 'shipped'))
+  const completedTxs = transactions.filter(t => t.payment_status === 'paid' && t.orders.every(o => o.status === 'delivered'))
+
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
@@ -92,103 +203,31 @@ export default function Dashboard({ transactions = [] }: { transactions: Transac
             <p className="text-muted-foreground mt-2">Track, manage, and review your recent orders.</p>
           </div>
 
-          <div className="flex flex-col gap-6">
-            {transactions.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center border rounded-lg bg-card border-dashed">
-                <Package className="w-12 h-12 text-muted-foreground/50 mb-4" />
-                <h3 className="text-lg font-medium">No purchases yet</h3>
-                <p className="text-sm text-muted-foreground max-w-sm mt-1">
-                  You haven't placed any orders. Start browsing the marketplace to find something you like!
-                </p>
-              </div>
-            ) : (
-              transactions.map((transaction) => (
-                <Card key={transaction.id} className="overflow-hidden shadow-sm">
-                  {/* Transaction Header */}
-                  <div className="bg-muted/40 border-b px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm font-semibold text-foreground">
-                          Order Date: {new Date(transaction.created_at).toLocaleDateString()}
-                        </span>
-                        {getPaymentStatusBadge(transaction.payment_status)}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Transaction ID: TXN-{transaction.id}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-muted-foreground">Total Amount</p>
-                      <p className="text-base font-bold">{formatRp(Number(transaction.gross_amount))}</p>
-                    </div>
-                  </div>
-
-                  {/* Orders Within Transaction */}
-                  <div className="divide-y">
-                    {transaction.orders.map((order) => (
-                      <div key={order.id} className="p-6">
-                        {/* Seller & Status */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm">Seller: {order.seller.name}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {getOrderStatusIcon(order.status)}
-                            {getOrderStatusBadge(order.status)}
-                          </div>
-                        </div>
-
-                        {/* Order Items */}
-                        <div className="space-y-4">
-                          {order.items.map((item) => (
-                            <div key={item.id} className="flex gap-4 items-start">
-                              <div className="h-16 w-16 bg-muted rounded-md overflow-hidden shrink-0 border relative">
-                                {item.product.images?.[0] ? (
-                                  <img 
-                                    src={`/storage/${item.product.images[0].image_url}`} 
-                                    alt={item.product.name}
-                                    className="object-cover w-full h-full"
-                                  />
-                                ) : (
-                                  <div className="flex items-center justify-center w-full h-full text-xs text-muted-foreground">
-                                    No Image
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h4 className="text-sm font-medium line-clamp-2">{item.product.name}</h4>
-                                <p className="text-sm text-muted-foreground mt-1">{item.quantity} x {formatRp(Number(item.price))}</p>
-                              </div>
-                              <div className="text-right shrink-0">
-                                <p className="text-sm font-medium">{formatRp(Number(item.price) * item.quantity)}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Shipping Info Footer */}
-                        <div className="mt-6 p-4 rounded-md bg-secondary/30 flex items-center justify-between text-sm">
-                          <div className="flex flex-col gap-1">
-                            <span className="text-muted-foreground flex items-center gap-1">
-                              <Truck className="w-3.5 h-3.5" /> Shipping Courier
-                            </span>
-                            <span className="font-medium">
-                              {order.shipping_courier.toUpperCase()} - {order.shipping_service}
-                            </span>
-                          </div>
-                          <div className="text-right flex flex-col gap-1">
-                            <span className="text-muted-foreground">Shipping Cost</span>
-                            <span className="font-medium">{formatRp(Number(order.shipping_cost))}</span>
-                          </div>
-                        </div>
-                        
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              ))
-            )}
-          </div>
+          <Tabs defaultValue="all" className="w-full">
+            <TabsList className="mb-6 w-full justify-start overflow-x-auto">
+              <TabsTrigger value="all">All Orders</TabsTrigger>
+              <TabsTrigger value="unpaid">Unpaid</TabsTrigger>
+              <TabsTrigger value="confirmed">Confirmed / Packing</TabsTrigger>
+              <TabsTrigger value="shipping">Shipping</TabsTrigger>
+              <TabsTrigger value="completed">Completed</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="all" className="mt-0">
+              {renderTransactionList(transactions)}
+            </TabsContent>
+            <TabsContent value="unpaid" className="mt-0">
+              {renderTransactionList(unpaidTxs)}
+            </TabsContent>
+            <TabsContent value="confirmed" className="mt-0">
+              {renderTransactionList(confirmedTxs)}
+            </TabsContent>
+            <TabsContent value="shipping" className="mt-0">
+              {renderTransactionList(shippingTxs)}
+            </TabsContent>
+            <TabsContent value="completed" className="mt-0">
+              {renderTransactionList(completedTxs)}
+            </TabsContent>
+          </Tabs>
 
         </div>
       </div>
