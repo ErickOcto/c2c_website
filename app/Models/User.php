@@ -5,23 +5,24 @@ namespace App\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Modules\Cart\Models\Cart;
+use Modules\Cart\Models\Wishlist;
 use Modules\Chat\Models\Conversation;
 use Modules\Chat\Models\Message;
-use Modules\Transaction\Models\Transaction;
+use Modules\Feedback\Models\Review;
 use Modules\Order\Models\Order;
 use Modules\Product\Models\Product;
-use Modules\Feedback\Models\Review;
-use Modules\Cart\Models\Wishlist;
-use Modules\Cart\Models\Cart;
+use Modules\Transaction\Models\Transaction;
 
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use Notifiable;
+    use HasFactory, Notifiable;
 
     public function conversations()
     {
@@ -84,5 +85,4 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Message::class, 'receiver_id');
     }
-
 }

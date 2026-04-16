@@ -3,12 +3,13 @@
 namespace Modules\Chat\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Modules\Chat\Models\Conversation;
+use Modules\Product\Models\Product;
 
 class ConversationController extends Controller
 {
@@ -125,6 +126,20 @@ class ConversationController extends Controller
             ->sortByDesc('updated_at')
             ->values();
 
+        // If a product_id is in the query string, load it and pass as initialProduct
+        $initialProduct = null;
+        if ($request->filled('product_id')) {
+            $product = Product::with('images')->find($request->integer('product_id'));
+            if ($product) {
+                $initialProduct = [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'price' => $product->price,
+                    'image_url' => $product->images->first()?->image_url,
+                ];
+            }
+        }
+
         return Inertia::render('chat/index', [
             'conversations' => $conversations,
             'activeConversation' => [
@@ -136,7 +151,39 @@ class ConversationController extends Controller
                 ] : null,
                 'messages' => $messages,
             ],
+            'initialProduct' => $initialProduct,
         ]);
+    }
+
+    /**
+     * Search products for the in-chat product picker.
+     * Scoped to a specific seller's active products.
+     */
+    public function searchProducts(Request $request): JsonResponse
+    {
+        $query = Product::with('images')
+            ->where('status', 'active');
+
+        if ($request->filled('seller_id')) {
+            $query->where('user_id', $request->integer('seller_id'));
+        }
+
+        if ($request->filled('q')) {
+            $search = $request->input('q');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('brand', 'like', "%{$search}%");
+            });
+        }
+
+        $products = $query->latest()->take(20)->get()->map(fn ($product) => [
+            'id' => $product->id,
+            'name' => $product->name,
+            'price' => $product->price,
+            'image_url' => $product->images->first()?->image_url,
+        ]);
+
+        return response()->json(['products' => $products]);
     }
 
     /**
@@ -170,11 +217,11 @@ class ConversationController extends Controller
             $conversation->participants()->attach([$user->id, $receiverId]);
         }
 
-        $redirectUrl = '/chat/' . $conversation->id;
+        $redirectUrl = '/chat/'.$conversation->id;
 
         // If a product was linked, pass it as a query param so the frontend can pre-fill
         if ($request->filled('product_id')) {
-            $redirectUrl .= '?product_id=' . $request->integer('product_id');
+            $redirectUrl .= '?product_id='.$request->integer('product_id');
         }
 
         return redirect($redirectUrl);

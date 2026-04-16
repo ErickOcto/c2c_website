@@ -15,9 +15,10 @@ import { Button } from '@/components/ui/button';
 type Props = {
     conversations: ConversationSummary[];
     activeConversation?: ActiveConversation;
+    initialProduct?: LinkedProduct | null;
 };
 
-export default function ChatIndex({ conversations, activeConversation }: Props) {
+export default function ChatIndex({ conversations, activeConversation, initialProduct }: Props) {
     const { auth } = usePage<{
         auth: { user: { id: number; name: string } };
     }>().props;
@@ -25,33 +26,21 @@ export default function ChatIndex({ conversations, activeConversation }: Props) 
     const [messages, setMessages] = useState<ChatMessage[]>(
         activeConversation?.messages ?? [],
     );
-    const [linkedProduct, setLinkedProduct] = useState<LinkedProduct | null>(null);
+    const [linkedProduct, setLinkedProduct] = useState<LinkedProduct | null>(
+        initialProduct ?? null,
+    );
     const [sending, setSending] = useState(false);
     const [mobileShowChat, setMobileShowChat] = useState(!!activeConversation);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Check for product_id in URL query params to pre-link a product
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const productId = params.get('product_id');
-        if (productId && activeConversation) {
-            // Fetch product info for linking
-            fetch(`/api/products/${productId}`)
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data?.id) {
-                        setLinkedProduct(data);
-                    }
-                })
-                .catch(() => {
-                    // Ignore fetch errors for product linking
-                });
-        }
-    }, [activeConversation]);
-
     // Sync messages when active conversation changes
     useEffect(() => {
         setMessages(activeConversation?.messages ?? []);
+    }, [activeConversation?.id]);
+
+    // Sync initial product when conversation changes (e.g. navigating to a new conversation with a product)
+    useEffect(() => {
+        setLinkedProduct(initialProduct ?? null);
     }, [activeConversation?.id]);
 
     // Auto-scroll to bottom
@@ -109,6 +98,8 @@ export default function ChatIndex({ conversations, activeConversation }: Props) 
             };
 
             setMessages((prev) => [...prev, optimisticMessage]);
+            const productToSend = linkedProduct;
+            setLinkedProduct(null);
 
             try {
                 const response = await fetch(
@@ -125,7 +116,7 @@ export default function ChatIndex({ conversations, activeConversation }: Props) 
                         },
                         body: JSON.stringify({
                             message: text,
-                            product_id: linkedProduct?.id ?? null,
+                            product_id: productToSend?.id ?? null,
                         }),
                     },
                 );
@@ -138,14 +129,19 @@ export default function ChatIndex({ conversations, activeConversation }: Props) 
                             m.id === optimisticMessage.id ? data.message : m,
                         ),
                     );
-                    // Clear linked product after sending
-                    setLinkedProduct(null);
+                } else {
+                    // Rollback on HTTP error
+                    setMessages((prev) =>
+                        prev.filter((m) => m.id !== optimisticMessage.id),
+                    );
+                    setLinkedProduct(productToSend);
                 }
             } catch {
-                // Remove optimistic message on error
+                // Remove optimistic message on network error
                 setMessages((prev) =>
                     prev.filter((m) => m.id !== optimisticMessage.id),
                 );
+                setLinkedProduct(productToSend);
             } finally {
                 setSending(false);
             }
@@ -157,6 +153,8 @@ export default function ChatIndex({ conversations, activeConversation }: Props) 
         setMobileShowChat(true);
         router.get(`/chat/${conversationId}`, {}, { preserveState: false });
     }, []);
+
+    const otherParticipantId = activeConversation?.other_participant?.id;
 
     return (
         <>
@@ -251,6 +249,8 @@ export default function ChatIndex({ conversations, activeConversation }: Props) 
                                     onRemoveLinkedProduct={() =>
                                         setLinkedProduct(null)
                                     }
+                                    onLinkProduct={setLinkedProduct}
+                                    sellerId={otherParticipantId}
                                 />
                             </>
                         ) : (

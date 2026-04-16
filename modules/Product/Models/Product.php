@@ -3,6 +3,7 @@
 namespace Modules\Product\Models;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,6 +12,13 @@ use Modules\Feedback\Models\Review;
 
 class Product extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\ProductFactory::new();
+    }
+
     protected $fillable = [
         'user_id',
         'category_id',
