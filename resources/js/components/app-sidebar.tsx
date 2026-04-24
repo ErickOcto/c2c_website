@@ -27,6 +27,7 @@ import {
   AnalyticsUpIcon,
 } from "@hugeicons/core-free-icons"
 import { Link, usePage } from "@inertiajs/react"
+import AppLogo from "./app-logo"
 
 const data = {
   navMain: [
@@ -99,8 +100,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
               <Link href="/dashboard">
-                <HugeiconsIcon icon={BabyBoyDressIcon} strokeWidth={1.6} className="size-8! bg-primary text-primary-foreground p-1 rounded-md" />
-                <span className="text-base font-semibold">C2C Website</span>
+                <AppLogo />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

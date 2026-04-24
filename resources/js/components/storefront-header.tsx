@@ -33,6 +33,7 @@ import {
 import { useInitials } from '@/hooks/use-initials';
 import { router } from '@inertiajs/react';
 import notifications from '@/routes/notifications';
+import AppLogoIcon from './app-logo-icon';
 
 const departments = [
     { name: 'Unisex', slug: 'unisex' },
@@ -95,8 +96,8 @@ export function StorefrontHeader() {
                             <SheetContent side="left" className="w-72 bg-background">
                                 <SheetTitle className="sr-only">Navigation</SheetTitle>
                                 <SheetHeader className="text-left pb-4 border-b">
-                                    <Link href="/" className="text-xl font-bold font-heading tracking-tight">
-                                        C2C<span className="text-primary"> Marketplace</span>
+                                    <Link href="/" className="text-xl font-bold font-heading tracking-tight flex items-center gap-2 ">
+                                        <AppLogoIcon className="size-9 fill-current text-primary dark:text-white" /> C2C
                                     </Link>
                                 </SheetHeader>
                                 <nav className="flex flex-col gap-1 pt-4">
@@ -117,9 +118,9 @@ export function StorefrontHeader() {
                         {/* Logo */}
                         <Link
                             href="/"
-                            className="shrink-0 text-xl font-bold font-heading tracking-tight"
+                            className="shrink-0 text-xl font-bold font-heading tracking-tight flex items-center gap-2"
                         >
-                            C2C<span className="text-primary"> Marketplace</span>
+                            <AppLogoIcon className="size-9 fill-current text-primary dark:text-white" /> C2C
                         </Link>
 
                         {/* Category nav — desktop */}

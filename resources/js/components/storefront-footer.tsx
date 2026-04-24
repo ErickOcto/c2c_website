@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { Heart } from 'lucide-react';
+import AppLogoIcon from './app-logo-icon';
 
 export function StorefrontFooter() {
     return (
@@ -10,9 +11,9 @@ export function StorefrontFooter() {
                     <div className="space-y-4">
                         <Link
                             href="/"
-                            className="text-xl font-bold font-heading tracking-tight"
+                            className="text-xl font-bold font-heading tracking-tight flex items-center gap-2"
                         >
-                            C2C<span className="text-primary"> Marketplace</span>
+                            <AppLogoIcon className="size-9 fill-current text-primary dark:text-white" /> C2C
                         </Link>
                         <p className="text-sm text-muted-foreground leading-relaxed">
                             Give your pre-loved fashion a second life.
