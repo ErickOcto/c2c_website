@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Modules\Cart\Models\Cart;
 use Modules\Chat\Models\Conversation;
+use Modules\Cart\Models\Wishlist;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -38,6 +39,7 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $cartItemCount = 0;
+        $wishlistItemCount = 0;
         $unreadNotificationsCount = 0;
         $recentNotifications = [];
         $unreadMessagesCount = 0;
@@ -45,6 +47,7 @@ class HandleInertiaRequests extends Middleware
         if ($request->user()) {
             $cart = Cart::where('user_id', $request->user()->id)->first();
             $cartItemCount = $cart ? $cart->items()->count() : 0;
+            $wishlistItemCount = Wishlist::where('user_id', $request->user()->id)->count();
             $unreadNotificationsCount = $request->user()->unreadNotifications()->count();
             $recentNotifications = $request->user()->notifications()->take(5)->get();
 
@@ -64,6 +67,7 @@ class HandleInertiaRequests extends Middleware
                 'recentNotifications' => $recentNotifications,
             ],
             'cartItemCount' => $cartItemCount,
+            'wishlistItemCount' => $wishlistItemCount,
             'unreadMessagesCount' => $unreadMessagesCount,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

@@ -1,5 +1,6 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import type { Product, Review as ReviewType } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,6 +18,16 @@ import { StarRating } from '@/components/star-rating';
 import { ProductCard } from '@/components/product-card';
 import { ReportDialog } from '@/components/report-dialog';
 import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import wishlistRoutes from '@/routes/wishlist';
+import {
     ShoppingBag,
     MessageCircle,
     UserPlus,
@@ -29,19 +40,30 @@ import {
     Heart,
     Share2,
     Star,
+    CheckCircle2,
+    PenLine,
 } from 'lucide-react';
 
 type Props = {
     product: Product;
     relatedProducts: Product[];
+    isWishlisted: boolean;
+    canReview: boolean;
+    userReview?: ReviewType | null;
 };
 
-export default function ProductShow({ product, relatedProducts }: Props) {
+export default function ProductShow({ product, relatedProducts, isWishlisted: initialWishlisted, canReview, userReview }: Props) {
+    const { auth } = usePage<{ auth: { user: any } }>().props;
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [selectedSize, setSelectedSize] = useState(product.size ?? '');
     const [quantity, setQuantity] = useState(1);
     const [isZoomed, setIsZoomed] = useState(false);
     const [processing, setProcessing] = useState(false);
+    const [wishlisted, setWishlisted] = useState(initialWishlisted);
+    const [reviewOpen, setReviewOpen] = useState(false);
+    const [reviewRating, setReviewRating] = useState(5);
+    const [reviewComment, setReviewComment] = useState('');
+    const [submittingReview, setSubmittingReview] = useState(false);
 
     const images = product.images ?? [];
     const currentImage =
@@ -85,7 +107,53 @@ export default function ProductShow({ product, relatedProducts }: Props) {
             quantity,
             size: selectedSize,
         }, {
+            preserveScroll: true,
+            onSuccess: () => toast.success('Added to cart! 🛍️'),
+            onError: () => toast.error('Failed to add to cart.'),
             onFinish: () => setProcessing(false),
+        });
+    }
+
+    function handleWishlistToggle() {
+        if (!auth.user) {
+            router.get('/login');
+            return;
+        }
+        router.post(wishlistRoutes.toggle.url({ product: product.id }), {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setWishlisted((prev) => {
+                    const next = !prev;
+                    toast[next ? 'success' : 'info'](next ? 'Added to wishlist! ❤️' : 'Removed from wishlist.');
+                    return next;
+                });
+            },
+            onError: () => toast.error('Failed to update wishlist.'),
+        });
+    }
+
+    function handleShare() {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            toast.success('Link copied to clipboard! 🔗');
+        }).catch(() => {
+            toast.error('Could not copy link.');
+        });
+    }
+
+    function handleSubmitReview(e: React.FormEvent) {
+        e.preventDefault();
+        setSubmittingReview(true);
+        router.post(`/products/${product.id}/review`, {
+            rating: reviewRating,
+            comment: reviewComment,
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success('Review submitted! Thank you.');
+                setReviewOpen(false);
+            },
+            onError: () => toast.error('Failed to submit review.'),
+            onFinish: () => setSubmittingReview(false),
         });
     }
 
@@ -286,8 +354,18 @@ export default function ProductShow({ product, relatedProducts }: Props) {
                                 <ShoppingBag className="h-5 w-5 mr-2" />
                                 {processing ? 'Adding...' : 'Add to Cart'}
                             </Button>
-                            <Button variant="outline" size="lg" className="rounded-lg">
-                                <Heart className="h-5 w-5" />
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                className="rounded-lg"
+                                onClick={handleWishlistToggle}
+                                aria-label="Toggle wishlist"
+                            >
+                                <Heart
+                                    className={`h-5 w-5 transition-colors ${
+                                        wishlisted ? 'fill-red-500 text-red-500' : ''
+                                    }`}
+                                />
                             </Button>
                         </div>
 
@@ -419,7 +497,12 @@ export default function ProductShow({ product, relatedProducts }: Props) {
 
                         {/* Share & Report */}
                         <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="sm" className="text-muted-foreground">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-muted-foreground"
+                                onClick={handleShare}
+                            >
                                 <Share2 className="h-4 w-4 mr-1" />
                                 Share
                             </Button>
@@ -430,9 +513,80 @@ export default function ProductShow({ product, relatedProducts }: Props) {
 
                 {/* Reviews Section */}
                 <section className="mt-16">
-                    <h2 className="text-xl font-bold font-heading tracking-tight mb-6">
-                        Reviews
-                    </h2>
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-xl font-bold font-heading tracking-tight">
+                            Reviews
+                        </h2>
+                        {/* Write a Review */}
+                        {canReview && (
+                            <Dialog open={reviewOpen} onOpenChange={setReviewOpen}>
+                                <DialogTrigger asChild>
+                                    <Button size="sm" variant="outline">
+                                        <PenLine className="h-4 w-4 mr-2" />
+                                        Write a Review
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-md">
+                                    <DialogHeader>
+                                        <DialogTitle>Write a Review</DialogTitle>
+                                    </DialogHeader>
+                                    <form onSubmit={handleSubmitReview} className="space-y-4">
+                                        <div>
+                                            <Label className="mb-2 block">Rating</Label>
+                                            <div className="flex gap-1">
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <button
+                                                        key={star}
+                                                        type="button"
+                                                        onClick={() => setReviewRating(star)}
+                                                        className="p-1 transition-colors"
+                                                    >
+                                                        <Star
+                                                            className={`h-7 w-7 transition-colors ${
+                                                                star <= reviewRating
+                                                                    ? 'fill-amber-400 text-amber-400'
+                                                                    : 'text-muted-foreground'
+                                                            }`}
+                                                        />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <Label htmlFor="review-comment" className="mb-2 block">
+                                                Comment (optional)
+                                            </Label>
+                                            <Textarea
+                                                id="review-comment"
+                                                value={reviewComment}
+                                                onChange={(e) => setReviewComment(e.target.value)}
+                                                placeholder="Share your experience with this product..."
+                                                rows={4}
+                                            />
+                                        </div>
+                                        <div className="flex gap-2 justify-end">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => setReviewOpen(false)}
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button type="submit" disabled={submittingReview}>
+                                                {submittingReview ? 'Submitting...' : 'Submit Review'}
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </DialogContent>
+                            </Dialog>
+                        )}
+                        {userReview && (
+                            <Badge variant="outline" className="gap-1 text-green-600 border-green-200">
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                You reviewed this
+                            </Badge>
+                        )}
+                    </div>
 
                     {reviews.length > 0 ? (
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -528,6 +682,16 @@ export default function ProductShow({ product, relatedProducts }: Props) {
                             <CardContent className="p-8 text-center text-muted-foreground">
                                 <Star className="h-10 w-10 mx-auto mb-3 opacity-20" />
                                 <p>No reviews yet for this product.</p>
+                                {canReview && (
+                                    <Button
+                                        className="mt-4"
+                                        size="sm"
+                                        onClick={() => setReviewOpen(true)}
+                                    >
+                                        <PenLine className="h-4 w-4 mr-2" />
+                                        Be the first to review!
+                                    </Button>
+                                )}
                             </CardContent>
                         </Card>
                     )}

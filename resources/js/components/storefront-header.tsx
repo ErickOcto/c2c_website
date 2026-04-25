@@ -43,13 +43,14 @@ const departments = [
 ];
 
 export function StorefrontHeader() {
-    const { auth, cartItemCount, unreadMessagesCount } = usePage<{
+    const { auth, cartItemCount, wishlistItemCount, unreadMessagesCount } = usePage<{
         auth: { 
             user: { id: number; name: string; email: string; avatar?: string } | null;
             unreadNotificationsCount: number;
             recentNotifications: any[];
         };
         cartItemCount: number;
+        wishlistItemCount: number;
         unreadMessagesCount: number;
     }>().props;
     const getInitials = useInitials();
@@ -225,10 +226,15 @@ export function StorefrontHeader() {
 
                             {/* Wishlist */}
                             {auth.user && (
-                                <Link href="/wishlist">
+                                <Link href="/wishlist" className="relative">
                                     <Button variant="ghost" size="icon" className="h-9 w-9 hidden sm:flex">
                                         <Heart className="h-5 w-5" />
                                     </Button>
+                                    {wishlistItemCount > 0 && (
+                                        <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 hidden sm:flex items-center justify-center text-[10px] font-bold bg-primary text-primary-foreground">
+                                            {wishlistItemCount}
+                                        </Badge>
+                                    )}
                                 </Link>
                             )}
 

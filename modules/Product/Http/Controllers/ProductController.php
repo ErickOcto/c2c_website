@@ -8,6 +8,9 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Fortify\Features;
 use Modules\Cart\Models\Cart;
+use Modules\Cart\Models\Wishlist;
+use Modules\Feedback\Models\Review;
+use Modules\Order\Models\OrderItem;
 use Modules\Product\Models\Category;
 use Modules\Product\Models\Product;
 
@@ -52,6 +55,27 @@ class ProductController extends Controller
             'reviews.user',
         ]);
 
+        $isWishlisted = false;
+        $canReview = false;
+        $userReview = null;
+
+        if ($request->user()) {
+            $isWishlisted = Wishlist::where('user_id', $request->user()->id)
+                ->where('product_id', $product->id)
+                ->exists();
+
+            // Can review if buyer has a completed order containing this product and hasn't reviewed yet
+            $hasBought = OrderItem::whereHas('order', function ($q) use ($request) {
+                $q->where('buyer_id', $request->user()->id)->where('status', 'completed');
+            })->where('product_id', $product->id)->exists();
+
+            $userReview = Review::where('user_id', $request->user()->id)
+                ->where('product_id', $product->id)
+                ->first();
+
+            $canReview = $hasBought && ! $userReview;
+        }
+
         $relatedProducts = Product::with(['images', 'category', 'seller.profile', 'reviews'])
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
@@ -62,6 +86,9 @@ class ProductController extends Controller
         return Inertia::render('products/show', [
             'product' => $product,
             'relatedProducts' => $relatedProducts,
+            'isWishlisted' => $isWishlisted,
+            'canReview' => $canReview,
+            'userReview' => $userReview,
         ]);
     }
 

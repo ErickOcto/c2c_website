@@ -17,7 +17,7 @@ class WishlistController extends Controller
      */
     public function index(Request $request): Response
     {
-        $wishlists = Wishlist::with('product.images')
+        $wishlists = Wishlist::with(['product.images', 'product.seller.profile'])
             ->where('user_id', $request->user()->id)
             ->latest()
             ->paginate(12);

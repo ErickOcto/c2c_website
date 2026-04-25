@@ -17,12 +17,22 @@ use Modules\Order\Models\Order;
 use Modules\Product\Models\Product;
 use Modules\Transaction\Models\Transaction;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'is_admin', 'is_banned'])]
 #[Hidden(['password', 'remember_token'])]
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
+
+    protected $casts = [
+        'is_admin' => 'boolean',
+        'is_banned' => 'boolean',
+    ];
+
+    public function isAdmin(): bool
+    {
+        return (bool) $this->is_admin;
+    }
 
     public function conversations()
     {

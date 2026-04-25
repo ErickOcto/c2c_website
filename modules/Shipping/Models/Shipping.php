@@ -7,6 +7,8 @@ use Modules\Order\Models\Order;
 
 class Shipping extends Model
 {
+    protected $fillable = ['order_id', 'courier', 'tracking_number', 'status'];
+
     public function order()
     {
         return $this->belongsTo(Order::class);

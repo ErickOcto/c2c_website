@@ -7,6 +7,7 @@ import { router, usePage } from '@inertiajs/react';
 import { cn } from '@/lib/utils';
 import wishlist from '@/routes/wishlist';
 import { login } from '@/routes';
+import { toast } from 'sonner';
 
 type Props = {
     product: Product;
@@ -37,7 +38,17 @@ export function ProductCard({ product }: Props) {
             return;
         }
 
-        router.post(wishlist.toggle.url({ product: product.id }), {}, { preserveScroll: true });
+    router.post(wishlist.toggle.url({ product: product.id }), {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            if (product.is_wishlisted) {
+                toast.info('Removed from wishlist.');
+            } else {
+                toast.success('Added to wishlist! ❤️');
+            }
+        },
+        onError: () => toast.error('Failed to update wishlist.'),
+    });
     };
 
     return (
