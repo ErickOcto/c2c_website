@@ -9,6 +9,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Modules\Cart\Models\Cart;
 use Modules\Cart\Models\CartItem;
+use Modules\Product\Models\Product;
 
 class CartController extends Controller
 {
@@ -38,6 +39,11 @@ class CartController extends Controller
             'quantity' => ['required', 'integer', 'min:1'],
             'size' => ['nullable', 'string'],
         ]);
+
+        $product = Product::find($request->input('product_id'));
+        if ($product && $product->user_id === $request->user()->id) {
+            return back()->withErrors(['product_id' => 'You cannot purchase your own product.']);
+        }
 
         $cart = Cart::firstOrCreate(['user_id' => $request->user()->id]);
 

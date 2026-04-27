@@ -135,6 +135,13 @@ class CheckoutController extends Controller
         }
 
         $cartItems = $cart->items()->with('product')->get();
+
+        foreach ($cartItems as $item) {
+            if ($item->product->user_id === $user->id) {
+                return response()->json(['error' => 'You cannot purchase your own product.'], 422);
+            }
+        }
+
         $sellerShipments = collect($request->input('seller_shipments'))->keyBy('seller_id');
 
         // Validate all sellers have a shipping option

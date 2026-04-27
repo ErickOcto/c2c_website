@@ -90,7 +90,7 @@ class OrderController extends Controller
             $itemNames = $order->items->map(fn ($i) => ($i->product->name ?? 'Product').' x'.$i->quantity)->implode(', ');
             $rows[] = [
                 '#'.$order->id,
-                $order->created_at->format('Y-m-d H:i'),
+                $order->created_at?->format('Y-m-d H:i') ?? '-',
                 $order->buyer->name ?? 'Unknown',
                 $itemNames,
                 strtoupper($order->shipping_courier ?? '').' '.($order->shipping_service ?? ''),

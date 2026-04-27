@@ -327,47 +327,53 @@ export default function ProductShow({ product, relatedProducts, isWishlisted: in
                         </div>
 
                         {/* Quantity & Add to Cart */}
-                        <div className="flex flex-col sm:flex-row gap-3">
-                            <div className="flex items-center border border-input rounded-lg">
-                                <button
-                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                    className="h-11 w-11 flex items-center justify-center hover:bg-accent rounded-l-lg transition-colors"
-                                >
-                                    <Minus className="h-4 w-4" />
-                                </button>
-                                <span className="h-11 w-12 flex items-center justify-center text-sm font-medium border-x border-input">
-                                    {quantity}
-                                </span>
-                                <button
-                                    onClick={() => setQuantity(quantity + 1)}
-                                    className="h-11 w-11 flex items-center justify-center hover:bg-accent rounded-r-lg transition-colors"
-                                >
-                                    <Plus className="h-4 w-4" />
-                                </button>
+                        {auth.user?.id === product.user_id ? (
+                            <div className="w-full text-center p-4 bg-muted/50 rounded-lg text-sm font-medium text-muted-foreground border border-border">
+                                This is your product. You cannot purchase your own listings.
                             </div>
-                            <Button
-                                size="lg"
-                                className="flex-1 rounded-lg font-semibold text-base"
-                                onClick={handleAddToCart}
-                                disabled={processing}
-                            >
-                                <ShoppingBag className="h-5 w-5 mr-2" />
-                                {processing ? 'Adding...' : 'Add to Cart'}
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="lg"
-                                className="rounded-lg"
-                                onClick={handleWishlistToggle}
-                                aria-label="Toggle wishlist"
-                            >
-                                <Heart
-                                    className={`h-5 w-5 transition-colors ${
-                                        wishlisted ? 'fill-red-500 text-red-500' : ''
-                                    }`}
-                                />
-                            </Button>
-                        </div>
+                        ) : (
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <div className="flex items-center border border-input rounded-lg">
+                                    <button
+                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                        className="h-11 w-11 flex items-center justify-center hover:bg-accent rounded-l-lg transition-colors"
+                                    >
+                                        <Minus className="h-4 w-4" />
+                                    </button>
+                                    <span className="h-11 w-12 flex items-center justify-center text-sm font-medium border-x border-input">
+                                        {quantity}
+                                    </span>
+                                    <button
+                                        onClick={() => setQuantity(quantity + 1)}
+                                        className="h-11 w-11 flex items-center justify-center hover:bg-accent rounded-r-lg transition-colors"
+                                    >
+                                        <Plus className="h-4 w-4" />
+                                    </button>
+                                </div>
+                                <Button
+                                    size="lg"
+                                    className="flex-1 rounded-lg font-semibold text-base"
+                                    onClick={handleAddToCart}
+                                    disabled={processing}
+                                >
+                                    <ShoppingBag className="h-5 w-5 mr-2" />
+                                    {processing ? 'Adding...' : 'Add to Cart'}
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="lg"
+                                    className="rounded-lg"
+                                    onClick={handleWishlistToggle}
+                                    aria-label="Toggle wishlist"
+                                >
+                                    <Heart
+                                        className={`h-5 w-5 transition-colors ${
+                                            wishlisted ? 'fill-red-500 text-red-500' : ''
+                                        }`}
+                                    />
+                                </Button>
+                            </div>
+                        )}
 
                         <Separator />
 
