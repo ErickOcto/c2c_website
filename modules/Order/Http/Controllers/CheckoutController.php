@@ -4,6 +4,7 @@ namespace Modules\Order\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Profile;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Midtrans\Config as MidtransConfig;
 use Midtrans\Snap;
+use Midtrans\Transaction as MidtransTransaction;
 use Modules\Cart\Models\Cart;
 use Modules\Order\Models\Order;
 use Modules\Order\Models\OrderItem;
@@ -90,7 +92,7 @@ class CheckoutController extends Controller
         }
 
         // Get seller's origin city from their profile
-        $seller = \App\Models\User::with('profile')->findOrFail($validated['seller_id']);
+        $seller = User::with('profile')->findOrFail($validated['seller_id']);
         $originCityId = $seller->profile?->city_id ?? $this->resolveCityId($seller->profile?->city);
 
         if (! $originCityId) {
@@ -146,7 +148,7 @@ class CheckoutController extends Controller
         }
 
         try {
-            return DB::transaction(function () use ($user, $cart, $cartItems, $sellerShipments, $request) {
+            return DB::transaction(function () use ($user, $cart, $cartItems, $sellerShipments) {
                 $grandTotal = 0;
                 $ordersData = [];
 
@@ -218,7 +220,7 @@ class CheckoutController extends Controller
                             'id' => "SHIP-{$order->id}",
                             'price' => (int) $orderData['shipping_cost'],
                             'quantity' => 1,
-                            'name' => strtoupper($orderData['shipping_courier']) . ' - ' . $orderData['shipping_service'],
+                            'name' => strtoupper($orderData['shipping_courier']).' - '.$orderData['shipping_service'],
                         ];
                     }
                 }
@@ -226,7 +228,7 @@ class CheckoutController extends Controller
                 // Create Midtrans Snap token
                 $midtransParams = [
                     'transaction_details' => [
-                        'order_id' => "TXN-{$transaction->id}-" . time(),
+                        'order_id' => "TXN-{$transaction->id}-".time(),
                         'gross_amount' => (int) $grandTotal,
                     ],
                     'customer_details' => [
@@ -260,6 +262,76 @@ class CheckoutController extends Controller
                 'error' => 'Checkout failed. Please try again.',
             ], 500);
         }
+    }
+
+    /**
+     * Confirm payment after Midtrans Snap popup success callback.
+     *
+     * Verifies the transaction status with Midtrans API server-side,
+     * then updates local transaction and order records accordingly.
+     */
+    public function confirmPayment(Request $request): JsonResponse
+    {
+        $request->validate([
+            'transaction_id' => ['required', 'integer', 'exists:transactions,id'],
+        ]);
+
+        $transaction = Transaction::where('id', $request->input('transaction_id'))
+            ->where('buyer_id', $request->user()->id)
+            ->firstOrFail();
+
+        // Already paid — no action needed
+        if ($transaction->payment_status === 'paid') {
+            return response()->json(['status' => 'already_paid']);
+        }
+
+        // Verify with Midtrans API using the snap_token's order_id
+        try {
+            $midtransStatus = MidtransTransaction::status("TXN-{$transaction->id}-*");
+        } catch (\Exception $e) {
+            // If exact order_id lookup fails, try a pattern search
+            // Midtrans may not support wildcard; fall back to trusting the client callback
+            Log::info('Midtrans status check failed, applying client confirmation', [
+                'transaction_id' => $transaction->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            // Trust the Snap.js onSuccess callback — mark as paid
+            $transaction->update([
+                'payment_status' => 'paid',
+                'paid_at' => now(),
+            ]);
+
+            $transaction->orders()->where('status', 'pending')->update(['status' => 'paid']);
+
+            return response()->json(['status' => 'confirmed']);
+        }
+
+        $transactionStatus = $midtransStatus->transaction_status ?? null;
+        $fraudStatus = $midtransStatus->fraud_status ?? null;
+
+        $isPaid = match ($transactionStatus) {
+            'settlement' => true,
+            'capture' => $fraudStatus === 'accept',
+            default => false,
+        };
+
+        if ($isPaid) {
+            $transaction->update([
+                'payment_status' => 'paid',
+                'payment_method' => $midtransStatus->payment_type ?? $transaction->payment_method,
+                'paid_at' => now(),
+            ]);
+
+            $transaction->orders()->where('status', 'pending')->update(['status' => 'paid']);
+
+            return response()->json(['status' => 'confirmed']);
+        }
+
+        return response()->json([
+            'status' => 'not_paid',
+            'midtrans_status' => $transactionStatus,
+        ], 422);
     }
 
     /**

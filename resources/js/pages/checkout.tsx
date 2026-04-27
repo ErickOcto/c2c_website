@@ -251,7 +251,29 @@ export default function CheckoutPage({
             // Launch Midtrans Snap popup
             if (data.snap_token && window.snap) {
                 window.snap.pay(data.snap_token, {
-                    onSuccess: () => {
+                    onSuccess: async () => {
+                        try {
+                            await fetch('/checkout/confirm-payment', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-XSRF-TOKEN': decodeURIComponent(
+                                        document.cookie
+                                            .split('; ')
+                                            .find((row) =>
+                                                row.startsWith('XSRF-TOKEN='),
+                                            )
+                                            ?.split('=')[1] ?? '',
+                                    ),
+                                    Accept: 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    transaction_id: data.transaction_id,
+                                }),
+                            });
+                        } catch {
+                            // Silently fail — webhook will catch it eventually
+                        }
                         toast.success('Payment successful!');
                         router.visit('/dashboard');
                     },

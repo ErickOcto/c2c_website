@@ -24,7 +24,7 @@ export interface Order {
   shipping_service: string
   shipping_cost: string
   shipping_etd: string | null
-  status: 'pending' | 'processed' | 'shipped' | 'delivered' | 'cancelled'
+  status: 'pending' | 'paid' | 'processed' | 'shipped' | 'delivered' | 'completed' | 'cancelled'
   items: OrderItem[]
   seller: { id: number; name: string }
 }
@@ -59,9 +59,11 @@ export default function Dashboard({ transactions = [] }: { transactions: Transac
   const getOrderStatusIcon = (status: Order['status']) => {
     switch (status) {
       case 'pending': return <Clock className="w-4 h-4 text-yellow-500" />
+      case 'paid': return <Package className="w-4 h-4 text-blue-500" />
       case 'processed': return <Package className="w-4 h-4 text-blue-500" />
       case 'shipped': return <Truck className="w-4 h-4 text-purple-500" />
-      case 'delivered': return <CheckCircle2 className="w-4 h-4 text-green-500" />
+      case 'delivered':
+      case 'completed': return <CheckCircle2 className="w-4 h-4 text-green-500" />
       case 'cancelled': return <XCircle className="w-4 h-4 text-red-500" />
       default: return null
     }
@@ -70,16 +72,19 @@ export default function Dashboard({ transactions = [] }: { transactions: Transac
   const getOrderStatusBadge = (status: Order['status']) => {
     switch (status) {
       case 'delivered':
-        return <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">Delivered</Badge>
+      case 'completed':
+        return <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">Completed</Badge>
       case 'shipped':
         return <Badge variant="outline" className="text-purple-600 border-purple-200 bg-purple-50">Shipped</Badge>
+      case 'paid':
+        return <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">Paid — Ready to Ship</Badge>
       case 'processed':
-        return <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">Processed</Badge>
+        return <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">Processing</Badge>
       case 'cancelled':
         return <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50">Cancelled</Badge>
       case 'pending':
       default:
-        return <Badge variant="outline" className="text-yellow-600 border-yellow-200 bg-yellow-50">Pending</Badge>
+        return <Badge variant="outline" className="text-yellow-600 border-yellow-200 bg-yellow-50">Awaiting Payment</Badge>
     }
   }
 
@@ -189,9 +194,9 @@ export default function Dashboard({ transactions = [] }: { transactions: Transac
 
   // Filters
   const unpaidTxs = transactions.filter(t => t.payment_status === 'pending')
-  const confirmedTxs = transactions.filter(t => t.payment_status === 'paid' && t.orders.some(o => o.status === 'pending' || o.status === 'processed'))
+  const confirmedTxs = transactions.filter(t => t.payment_status === 'paid' && t.orders.some(o => o.status === 'paid' || o.status === 'processed'))
   const shippingTxs = transactions.filter(t => t.payment_status === 'paid' && t.orders.some(o => o.status === 'shipped'))
-  const completedTxs = transactions.filter(t => t.payment_status === 'paid' && t.orders.every(o => o.status === 'delivered'))
+  const completedTxs = transactions.filter(t => t.payment_status === 'paid' && t.orders.every(o => o.status === 'delivered' || o.status === 'completed'))
 
   return (
     <div className="flex flex-1 flex-col">
