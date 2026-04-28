@@ -279,7 +279,9 @@ export function StorefrontHeader() {
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="w-80">
                                         <DropdownMenuLabel className="flex justify-between items-center px-4 py-2">
-                                            <span className="font-semibold text-sm">Notifications</span>
+                                            <Link href="/notifications" className="font-semibold text-sm hover:underline hover:text-primary transition-colors">
+                                                Notifications
+                                            </Link>
                                             {auth.unreadNotificationsCount > 0 && (
                                                 <Button variant="ghost" size="sm" className="h-auto p-1 text-xs text-muted-foreground hover:text-primary" onClick={markAllAsRead}>
                                                     Mark all as read
