@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Search,
     ShoppingBag,
@@ -24,6 +24,15 @@ import {
     DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import {
+    NavigationMenu,
+    NavigationMenuContent,
+    NavigationMenuItem,
+    NavigationMenuLink,
+    NavigationMenuList,
+    NavigationMenuTrigger,
+    navigationMenuTriggerStyle,
+} from '@/components/ui/navigation-menu';
+import {
     Sheet,
     SheetContent,
     SheetHeader,
@@ -42,6 +51,24 @@ const departments = [
     { name: 'Kids', slug: 'kids' },
 ];
 
+const categories = [
+    { title: "Tops & T-Shirts", href: "/search?category=tops" },
+    { title: "Pants & Jeans", href: "/search?category=pants" },
+    { title: "Dresses & Skirts", href: "/search?category=dresses" },
+    { title: "Jackets & Coats", href: "/search?category=outerwear" },
+    { title: "Shoes & Sneakers", href: "/search?category=shoes" },
+    { title: "Accessories & Bags", href: "/search?category=accessories" },
+];
+
+const brands = [
+    { title: "Nike", href: "/search?brand=nike" },
+    { title: "Adidas", href: "/search?brand=adidas" },
+    { title: "Uniqlo", href: "/search?brand=uniqlo" },
+    { title: "H&M", href: "/search?brand=hm" },
+    { title: "Zara", href: "/search?brand=zara" },
+    { title: "Gucci", href: "/search?brand=gucci" },
+];
+
 export function StorefrontHeader() {
     const { auth, cartItemCount, wishlistItemCount, unreadMessagesCount } = usePage<{
         auth: { 
@@ -56,6 +83,15 @@ export function StorefrontHeader() {
     const getInitials = useInitials();
     const [searchQuery, setSearchQuery] = useState('');
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 20);
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     function handleSearch(e: React.FormEvent) {
         e.preventDefault();
@@ -73,15 +109,15 @@ export function StorefrontHeader() {
     }
 
     return (
-        <header className="sticky top-0 z-50 w-full">
+        <header className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? 'py-4' : ''}`}>
             {/* Top banner */}
-            <div className="bg-primary text-primary-foreground text-center text-xs py-1.5 font-medium tracking-wide">
+            <div className={`bg-primary text-primary-foreground text-center text-xs font-medium tracking-wide transition-all duration-300 overflow-hidden ${isScrolled ? 'h-0 opacity-0' : 'h-7 py-1.5 opacity-100'}`}>
                 ✨ Give your pre-loved fashion a second life — Free shipping on first order!
             </div>
 
             {/* Main header */}
-            <div className="bg-background/95 backdrop-blur-md border-b border-border/60">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className={`transition-all duration-300 mx-auto ${isScrolled ? 'max-w-6xl px-4' : 'w-full'}`}>
+                <div className={`bg-background/80 backdrop-blur-xl transition-all duration-300 border-border/60 ${isScrolled ? 'border shadow-lg shadow-black/5 rounded-full px-4 lg:px-6' : 'border-b px-4 sm:px-6 lg:px-8'}`}>
                     <div className="flex h-16 items-center justify-between gap-4">
                         {/* Mobile menu */}
                         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -124,18 +160,80 @@ export function StorefrontHeader() {
                             <AppLogoIcon className="size-9 fill-current text-primary dark:text-white" /> C2C
                         </Link>
 
-                        {/* Category nav — desktop */}
-                        <nav className="hidden lg:flex items-center gap-1">
-                            {departments.map((dept) => (
-                                <Link
-                                    key={dept.slug}
-                                    href={`/search?department=${dept.slug}`}
-                                    className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent"
-                                >
-                                    {dept.name}
-                                </Link>
-                            ))}
-                        </nav>
+                        {/* Mega Menu — desktop */}
+                        <div className="hidden lg:flex flex-1 items-center justify-center">
+                            <NavigationMenu>
+                                <NavigationMenuList>
+                                    <NavigationMenuItem>
+                                        <NavigationMenuTrigger>Departments</NavigationMenuTrigger>
+                                        <NavigationMenuContent>
+                                            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                                                {departments.map((dept) => (
+                                                    <li key={dept.slug}>
+                                                        <NavigationMenuLink asChild>
+                                                            <Link
+                                                                href={`/search?department=${dept.slug}`}
+                                                                className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                                                            >
+                                                                <div className="text-sm font-medium leading-none">{dept.name}</div>
+                                                                <p className="line-clamp-2 text-sm leading-snug text-muted-foreground mt-2">
+                                                                    Shop the latest {dept.name.toLowerCase()} fashion and accessories.
+                                                                </p>
+                                                            </Link>
+                                                        </NavigationMenuLink>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </NavigationMenuContent>
+                                    </NavigationMenuItem>
+                                    <NavigationMenuItem>
+                                        <NavigationMenuTrigger>Categories</NavigationMenuTrigger>
+                                        <NavigationMenuContent>
+                                            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                                                {categories.map((cat) => (
+                                                    <li key={cat.title}>
+                                                        <NavigationMenuLink asChild>
+                                                            <Link
+                                                                href={cat.href}
+                                                                className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                                                            >
+                                                                <div className="text-sm font-medium leading-none">{cat.title}</div>
+                                                            </Link>
+                                                        </NavigationMenuLink>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </NavigationMenuContent>
+                                    </NavigationMenuItem>
+                                    <NavigationMenuItem>
+                                        <NavigationMenuTrigger>Brands</NavigationMenuTrigger>
+                                        <NavigationMenuContent>
+                                            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-3 lg:w-[600px]">
+                                                {brands.map((brand) => (
+                                                    <li key={brand.title}>
+                                                        <NavigationMenuLink asChild>
+                                                            <Link
+                                                                href={brand.href}
+                                                                className="block select-none space-y-1 rounded-md p-4 leading-none no-underline outline-none transition-colors hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground text-center border bg-muted/20"
+                                                            >
+                                                                <div className="text-sm font-semibold leading-none">{brand.title}</div>
+                                                            </Link>
+                                                        </NavigationMenuLink>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </NavigationMenuContent>
+                                    </NavigationMenuItem>
+                                    <NavigationMenuItem>
+                                        <NavigationMenuLink asChild>
+                                            <Link href="/search?deals=true" className={navigationMenuTriggerStyle()}>
+                                                Deals
+                                            </Link>
+                                        </NavigationMenuLink>
+                                    </NavigationMenuItem>
+                                </NavigationMenuList>
+                            </NavigationMenu>
+                        </div>
 
                         {/* Search + Actions */}
                         <div className="flex items-center gap-2">

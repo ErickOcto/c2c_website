@@ -443,9 +443,10 @@ export default function ProductShow({ product, relatedProducts, isWishlisted: in
                             <h3 className="text-sm font-semibold mb-2">
                                 Description
                             </h3>
-                            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-                                {product.description}
-                            </p>
+                            <div 
+                                className="text-sm text-muted-foreground leading-relaxed prose prose-sm max-w-none"
+                                dangerouslySetInnerHTML={{ __html: product.description }}
+                            />
                         </div>
 
                         <Separator />

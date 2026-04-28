@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
+import { WysiwygEditor } from '@/components/wysiwyg-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,6 +28,7 @@ export default function CreateProduct({ categories }: Props) {
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [previews, setPreviews] = useState<string[]>([]);
+    const [description, setDescription] = useState('');
     const formRef = useRef<HTMLFormElement>(null);
 
     function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -48,6 +50,7 @@ export default function CreateProduct({ categories }: Props) {
         setErrors({});
 
         const formData = new FormData(formRef.current);
+        formData.set('description', description);
 
         router.post('/seller/products', formData, {
             forceFormData: true,
@@ -123,13 +126,10 @@ export default function CreateProduct({ categories }: Props) {
                         {/* Description */}
                         <div className="grid gap-2">
                             <Label htmlFor="description">Description *</Label>
-                            <textarea
-                                id="description"
-                                name="description"
-                                required
-                                rows={4}
+                            <WysiwygEditor 
+                                value={description} 
+                                onChange={setDescription} 
                                 placeholder="Describe the condition, size, material, and any defects..."
-                                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             />
                             <InputError message={errors.description} />
                         </div>
@@ -168,6 +168,23 @@ export default function CreateProduct({ categories }: Props) {
                                     </SelectContent>
                                 </Select>
                                 <InputError message={errors.condition} />
+                            </div>
+
+                            {/* Department / Gender */}
+                            <div className="grid gap-2">
+                                <Label htmlFor="department">Gender/Department *</Label>
+                                <Select name="department" required>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select gender" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="unisex">Unisex</SelectItem>
+                                        <SelectItem value="men">Men</SelectItem>
+                                        <SelectItem value="women">Women</SelectItem>
+                                        <SelectItem value="kids">Kids</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <InputError message={errors.department} />
                             </div>
 
                             {/* Price */}

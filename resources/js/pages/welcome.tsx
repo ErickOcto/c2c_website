@@ -50,6 +50,9 @@ export default function Welcome({
     categories = [],
     featuredProducts = [],
 }: Props) {
+    const freshArrivals = featuredProducts.slice(0, 5);
+    const topPicks = featuredProducts.length > 5 ? featuredProducts.slice(5, 10) : featuredProducts;
+
     return (
         <>
             <Head title="Home — Pre-Loved Fashion Marketplace" />
@@ -160,6 +163,33 @@ export default function Welcome({
                 </div>
             </section>
 
+            {/* ── Top Brands ── */}
+            <section className="py-16 md:py-20 bg-background border-t border-border/50">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-end justify-between mb-10">
+                        <div>
+                            <h2 className="text-2xl md:text-3xl font-bold font-heading tracking-tight mb-2">
+                                Popular Brands
+                            </h2>
+                            <p className="text-muted-foreground text-sm md:text-base">
+                                Explore top picks from your favorite brands
+                            </p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                        {['Nike', 'Adidas', 'Uniqlo', 'Zara', 'H&M', 'Gucci'].map((brand) => (
+                            <Link
+                                key={brand}
+                                href={`/search?brand=${brand.toLowerCase()}`}
+                                className="group flex flex-col items-center justify-center h-32 rounded-2xl bg-gradient-to-br from-card to-muted/30 border border-border/40 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 transition-all hover:-translate-y-1"
+                            >
+                                <span className="font-heading font-bold text-xl md:text-2xl tracking-tight text-foreground/80 group-hover:text-primary transition-colors">{brand}</span>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
             {/* ── Categories ── */}
             <section className="py-16 md:py-20 bg-background">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -200,8 +230,51 @@ export default function Welcome({
                 </div>
             </section>
 
-            {/* ── Featured Products ── */}
+            {/* ── Top Picks ── */}
             <section className="py-16 md:py-20 bg-gradient-to-b from-muted/30 via-muted/20 to-background">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-end justify-between mb-10">
+                        <div>
+                            <div className="inline-flex items-center gap-1.5 text-primary text-sm font-semibold mb-2">
+                                <Star className="h-4 w-4 fill-primary" />
+                                Top Picks
+                            </div>
+                            <h2 className="text-2xl md:text-3xl font-bold font-heading tracking-tight">
+                                Curated for You
+                            </h2>
+                        </div>
+                        <Link href="/search?sort=popular">
+                            <Button
+                                variant="outline"
+                                className="rounded-full hidden sm:flex hover:bg-primary hover:text-primary-foreground transition-colors"
+                            >
+                                View All
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        </Link>
+                    </div>
+                    {topPicks.length > 0 ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5">
+                            {topPicks.map((product) => (
+                                <ProductCard
+                                    key={product.id}
+                                    product={product}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-20 rounded-2xl border-2 border-dashed border-border">
+                            <ShoppingBag className="h-14 w-14 mx-auto mb-4 text-muted-foreground/30" />
+                            <p className="text-muted-foreground font-medium">
+                                More top picks coming soon!
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* ── Featured Products (Fresh Arrivals) ── */}
+            <section className="py-16 md:py-20 bg-background">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex items-end justify-between mb-10">
                         <div>
@@ -223,9 +296,9 @@ export default function Welcome({
                             </Button>
                         </Link>
                     </div>
-                    {featuredProducts.length > 0 ? (
+                    {freshArrivals.length > 0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5">
-                            {featuredProducts.map((product) => (
+                            {freshArrivals.map((product) => (
                                 <ProductCard
                                     key={product.id}
                                     product={product}

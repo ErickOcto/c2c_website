@@ -12,8 +12,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
     NavigationMenu,
+    NavigationMenuContent,
     NavigationMenuItem,
+    NavigationMenuLink,
     NavigationMenuList,
+    NavigationMenuTrigger,
     navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
 import {
@@ -44,6 +47,16 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'My Products',
+        href: '/seller/products',
+        icon: Folder,
+    },
+    {
+        title: 'Orders',
+        href: '/seller/orders',
+        icon: BookOpen,
     },
 ];
 
@@ -146,32 +159,81 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                     <div className="ml-6 hidden h-full items-center space-x-6 lg:flex">
                         <NavigationMenu className="flex h-full items-stretch">
                             <NavigationMenuList className="flex h-full items-stretch space-x-2">
-                                {mainNavItems.map((item, index) => (
-                                    <NavigationMenuItem
-                                        key={index}
-                                        className="relative flex h-full items-center"
-                                    >
-                                        <Link
-                                            href={item.href}
-                                            className={cn(
-                                                navigationMenuTriggerStyle(),
-                                                whenCurrentUrl(
-                                                    item.href,
-                                                    activeItemStyles,
-                                                ),
-                                                'h-9 cursor-pointer px-3',
-                                            )}
-                                        >
-                                            {item.icon && (
-                                                <item.icon className="mr-2 h-4 w-4" />
-                                            )}
-                                            {item.title}
-                                        </Link>
-                                        {isCurrentUrl(item.href) && (
-                                            <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
+                                <NavigationMenuItem className="relative flex h-full items-center">
+                                    <Link
+                                        href={dashboard()}
+                                        className={cn(
+                                            navigationMenuTriggerStyle(),
+                                            whenCurrentUrl(dashboard(), activeItemStyles),
+                                            'h-9 cursor-pointer px-3',
                                         )}
-                                    </NavigationMenuItem>
-                                ))}
+                                    >
+                                        <LayoutGrid className="mr-2 h-4 w-4" />
+                                        Dashboard
+                                    </Link>
+                                    {isCurrentUrl(dashboard()) && (
+                                        <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
+                                    )}
+                                </NavigationMenuItem>
+                                
+                                <NavigationMenuItem className="relative flex h-full items-center">
+                                    <NavigationMenuTrigger className="h-9 px-3 bg-transparent">
+                                        <Folder className="mr-2 h-4 w-4" />
+                                        Seller Tools
+                                    </NavigationMenuTrigger>
+                                    <NavigationMenuContent>
+                                        <ul className="grid w-[300px] gap-3 p-4 md:w-[400px] md:grid-cols-2 lg:w-[500px]">
+                                            <li>
+                                                <NavigationMenuLink asChild>
+                                                    <Link
+                                                        href="/seller/dashboard"
+                                                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                                                    >
+                                                        <div className="text-sm font-medium leading-none flex items-center gap-2">
+                                                            <LayoutGrid className="h-4 w-4" />
+                                                            Seller Dashboard
+                                                        </div>
+                                                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground mt-2">
+                                                            Overview of your store performance.
+                                                        </p>
+                                                    </Link>
+                                                </NavigationMenuLink>
+                                            </li>
+                                            <li>
+                                                <NavigationMenuLink asChild>
+                                                    <Link
+                                                        href="/seller/products"
+                                                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                                                    >
+                                                        <div className="text-sm font-medium leading-none flex items-center gap-2">
+                                                            <Folder className="h-4 w-4" />
+                                                            My Products
+                                                        </div>
+                                                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground mt-2">
+                                                            Manage your listings and inventory.
+                                                        </p>
+                                                    </Link>
+                                                </NavigationMenuLink>
+                                            </li>
+                                            <li>
+                                                <NavigationMenuLink asChild>
+                                                    <Link
+                                                        href="/seller/orders"
+                                                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                                                    >
+                                                        <div className="text-sm font-medium leading-none flex items-center gap-2">
+                                                            <BookOpen className="h-4 w-4" />
+                                                            Orders
+                                                        </div>
+                                                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground mt-2">
+                                                            View and process customer orders.
+                                                        </p>
+                                                    </Link>
+                                                </NavigationMenuLink>
+                                            </li>
+                                        </ul>
+                                    </NavigationMenuContent>
+                                </NavigationMenuItem>
                             </NavigationMenuList>
                         </NavigationMenu>
                     </div>
