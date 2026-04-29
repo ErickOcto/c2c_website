@@ -68,6 +68,57 @@ export default function SearchPage({
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const isFirstRender = useRef(true);
 
+    const [allProducts, setAllProducts] = useState<Product[]>(products.data);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const loadMoreRef = useRef<HTMLDivElement>(null);
+
+    // Sync products from Inertia props to local state
+    useEffect(() => {
+        if (products.current_page === 1) {
+            setAllProducts(products.data);
+        } else {
+            setAllProducts((prev) => {
+                const newProducts = products.data.filter(
+                    (p) => !prev.some((existing) => existing.id === p.id)
+                );
+                return [...prev, ...newProducts];
+            });
+        }
+    }, [products.data, products.current_page]);
+
+    // Intersection Observer for infinite scrolling
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (
+                    entries[0].isIntersecting &&
+                    products.next_page_url &&
+                    !isLoadingMore &&
+                    !isLoading
+                ) {
+                    setIsLoadingMore(true);
+                    router.get(
+                        products.next_page_url,
+                        {},
+                        {
+                            preserveState: true,
+                            preserveScroll: true,
+                            only: ['products'],
+                            onFinish: () => setIsLoadingMore(false),
+                        }
+                    );
+                }
+            },
+            { threshold: 0.1, rootMargin: '400px' }
+        );
+
+        if (loadMoreRef.current) {
+            observer.observe(loadMoreRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, [products.next_page_url, isLoadingMore, isLoading]);
+
     const applyFilters = useCallback(
         (newFilters: Filters) => {
             const cleanFilters: Record<string, string> = {};
@@ -436,10 +487,10 @@ export default function SearchPage({
                                     <ProductCardSkeleton key={i} />
                                 ))}
                             </div>
-                        ) : products.data.length > 0 ? (
+                        ) : allProducts.length > 0 ? (
                             <>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
-                                    {products.data.map((product) => (
+                                    {allProducts.map((product) => (
                                         <ProductCard
                                             key={product.id}
                                             product={product}
@@ -447,27 +498,16 @@ export default function SearchPage({
                                     ))}
                                 </div>
 
-                                {/* Pagination */}
-                                {products.last_page > 1 && (
-                                    <div className="flex justify-center gap-1 mt-8">
-                                        {products.links.map((link, index) => (
-                                            <Link
-                                                key={index}
-                                                href={link.url ?? '#'}
-                                                className={`h-9 min-w-[36px] px-3 flex items-center justify-center rounded-md text-sm font-medium transition-colors ${
-                                                    link.active
-                                                        ? 'bg-primary text-primary-foreground'
-                                                        : link.url
-                                                          ? 'hover:bg-accent border border-input'
-                                                          : 'opacity-50 cursor-not-allowed'
-                                                }`}
-                                                preserveState
-                                                preserveScroll
-                                                dangerouslySetInnerHTML={{
-                                                    __html: link.label,
-                                                }}
-                                            />
-                                        ))}
+                                {/* Infinite Scroll Marker */}
+                                {products.next_page_url && (
+                                    <div ref={loadMoreRef} className="mt-8">
+                                        {isLoadingMore && (
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
+                                                {Array.from({ length: 6 }, (_, i) => (
+                                                    <ProductCardSkeleton key={`skeleton-${i}`} />
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </>
