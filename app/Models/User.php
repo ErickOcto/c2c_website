@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 use Modules\Cart\Models\Cart;
 use Modules\Cart\Models\Wishlist;
 use Modules\Chat\Models\Conversation;
@@ -22,7 +23,7 @@ use Modules\Transaction\Models\Transaction;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     protected $casts = [
         'is_admin' => 'boolean',
