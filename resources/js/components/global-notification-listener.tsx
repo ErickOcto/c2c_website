@@ -4,6 +4,10 @@ import { toast } from 'sonner';
 import { useEffect } from 'react';
 
 export function GlobalNotificationListener() {
+    // 1. TAMBAHKAN BARIS INI UNTUK MEMATIKAN FITUR NOTIFIKASI SEMENTARA
+    return null;
+
+    // Kode di bawah ini tidak akan dieksekusi, jadi aplikasi tidak akan crash lagi
     const { auth } = usePage<{ auth: { user: { id: number } | null } }>().props;
 
     useEchoNotification(
@@ -11,7 +15,6 @@ export function GlobalNotificationListener() {
         (notification: any) => {
             if (!auth?.user) return;
 
-            // Show toast
             toast(notification.title || 'New Notification', {
                 description: notification.message || 'You have received a new notification.',
                 action: notification.url ? {
@@ -20,7 +23,6 @@ export function GlobalNotificationListener() {
                 } : undefined
             });
 
-            // Reload auth props to update unread counts and recent notifications
             router.reload({ only: ['auth'] });
         }
     );

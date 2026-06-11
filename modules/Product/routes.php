@@ -6,3 +6,4 @@ use Modules\Product\Http\Controllers\ProductController;
 Route::get('/', [ProductController::class, 'home'])->name('home');
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/search', [ProductController::class, 'search'])->name('products.search');
+Route::get('/shops/{user}', [ProductController::class, 'shop'])->name('shops.show');
