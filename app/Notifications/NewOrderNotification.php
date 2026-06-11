@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Modules\Order\Models\Order;
@@ -27,7 +28,7 @@ class NewOrderNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database', 'broadcast'];
     }
 
     /**
@@ -36,10 +37,10 @@ class NewOrderNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('You have a new order: #' . $this->order->id)
-            ->greeting('Hello ' . $notifiable->name . '!')
-            ->line('You have received a new order from ' . ($this->order->buyer->name ?? 'a buyer') . '.')
-            ->line('Order Total: Rp ' . number_format($this->order->total_price, 0, ',', '.'))
+            ->subject('You have a new order: #'.$this->order->id)
+            ->greeting('Hello '.$notifiable->name.'!')
+            ->line('You have received a new order from '.($this->order->buyer->name ?? 'a buyer').'.')
+            ->line('Order Total: Rp '.number_format($this->order->total_price, 0, ',', '.'))
             ->action('View new order', route('seller.orders.index'))
             ->line('Thank you for using our application!');
     }
@@ -52,7 +53,21 @@ class NewOrderNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'title' => 'New Order Received',
+            'message' => 'You have received a new order #'.$this->order->id.' from '.($this->order->buyer->name ?? 'a buyer').' for Rp '.number_format($this->order->total_price, 0, ',', '.'),
+            'url' => route('seller.orders.index'),
         ];
+    }
+
+    /**
+     * Get the broadcast representation of the notification.
+     */
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        return new BroadcastMessage([
+            'title' => 'New Order Received',
+            'message' => 'You have received a new order #'.$this->order->id.' from '.($this->order->buyer->name ?? 'a buyer').' for Rp '.number_format($this->order->total_price, 0, ',', '.'),
+            'url' => route('seller.orders.index'),
+        ]);
     }
 }
