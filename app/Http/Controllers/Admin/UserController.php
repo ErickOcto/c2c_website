@@ -37,7 +37,7 @@ class UserController extends Controller
 
     public function ban(Request $request, User $user): RedirectResponse
     {
-        if ($user->is_admin) {
+        if ($user->is_admin || $user->role === 'admin') {
             return back()->withErrors(['ban' => 'Cannot ban an admin user.']);
         }
 
