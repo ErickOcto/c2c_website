@@ -49,21 +49,16 @@ class ProfileController extends Controller
             'address', 'city', 'city_id', 'province_id', 'province_name', 'postal_code',
         ]);
 
-        if (! empty(array_filter($profileData))) {
-            $user->profile()->updateOrCreate(
-                ['user_id' => $user->id],
-                $profileData
-            );
-        }
-
         // Handle avatar upload
         if ($request->hasFile('avatar')) {
             $path = $request->file('avatar')->store('avatars', 'public');
-            $user->profile()->updateOrCreate(
-                ['user_id' => $user->id],
-                ['profile_picture' => '/storage/'.$path]
-            );
+            $profileData['profile_picture'] = '/storage/'.$path;
         }
+
+        $user->profile()->updateOrCreate(
+            ['user_id' => $user->id],
+            $profileData
+        );
 
         return to_route('profile.edit');
     }

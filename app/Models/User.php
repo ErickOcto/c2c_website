@@ -25,10 +25,19 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
+    protected $appends = [
+        'avatar',
+    ];
+
     protected $casts = [
         'is_admin' => 'boolean',
         'is_banned' => 'boolean',
     ];
+
+    public function getAvatarAttribute()
+    {
+        return $this->profile?->profile_picture;
+    }
 
     public function isAdmin(): bool
     {

@@ -62,7 +62,7 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user() ? clone $request->user()->load('profile') : null,
                 'unreadNotificationsCount' => $unreadNotificationsCount,
                 'recentNotifications' => $recentNotifications,
             ],
