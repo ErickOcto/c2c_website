@@ -23,6 +23,7 @@ createInertiaApp({
             case name === 'checkout':
             case name === 'wishlist':
             case name.startsWith('products/'):
+            case name.startsWith('shops/'):
             case name.startsWith('chat/'):
                 return StorefrontLayout;
             case name.startsWith('auth/'):

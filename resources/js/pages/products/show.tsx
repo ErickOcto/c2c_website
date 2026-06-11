@@ -456,16 +456,20 @@ export default function ProductShow({ product, relatedProducts, isWishlisted: in
                             <Card>
                                 <CardContent className="p-4">
                                     <div className="flex items-start gap-4">
-                                        <Avatar className="h-12 w-12">
-                                            <AvatarImage src={product.seller.avatar} />
-                                            <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                                                {product.seller.name.charAt(0)}
-                                            </AvatarFallback>
-                                        </Avatar>
+                                        <Link href={`/shops/${product.seller.id}`}>
+                                            <Avatar className="h-12 w-12 hover:opacity-80 transition-opacity">
+                                                <AvatarImage src={product.seller.avatar} />
+                                                <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                                                    {product.seller.name.charAt(0)}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                        </Link>
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="font-semibold text-sm">
-                                                {product.seller.name}
-                                            </h4>
+                                            <Link href={`/shops/${product.seller.id}`}>
+                                                <h4 className="font-semibold text-sm hover:underline">
+                                                    {product.seller.name}
+                                                </h4>
+                                            </Link>
                                             {product.seller.profile?.city && (
                                                 <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
                                                     <MapPin className="h-3 w-3" />
