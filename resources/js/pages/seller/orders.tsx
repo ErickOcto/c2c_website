@@ -171,7 +171,13 @@ export default function SellerOrders({ orders, currentStatus }: Props) {
                 setProcessOrder(null);
                 setTrackingNumber('');
             },
-            onError: () => toast.error('Failed to update order status.'),
+            onError: (errors) => {
+                if (errors.tracking_number) {
+                    toast.error(errors.tracking_number);
+                } else {
+                    toast.error('Failed to update order status.');
+                }
+            },
             onFinish: () => setProcessing(false),
         });
     }
