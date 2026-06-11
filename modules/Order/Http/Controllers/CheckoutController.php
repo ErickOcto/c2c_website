@@ -309,7 +309,12 @@ class CheckoutController extends Controller
                 'paid_at' => now(),
             ]);
 
+            $pendingOrders = $transaction->orders()->where('status', 'pending')->with(['seller', 'buyer'])->get();
             $transaction->orders()->where('status', 'pending')->update(['status' => 'paid']);
+
+            foreach ($pendingOrders as $order) {
+                $order->seller->notify(new \App\Notifications\NewOrderNotification($order));
+            }
 
             return response()->json(['status' => 'confirmed']);
         }
@@ -330,7 +335,12 @@ class CheckoutController extends Controller
                 'paid_at' => now(),
             ]);
 
+            $pendingOrders = $transaction->orders()->where('status', 'pending')->with(['seller', 'buyer'])->get();
             $transaction->orders()->where('status', 'pending')->update(['status' => 'paid']);
+
+            foreach ($pendingOrders as $order) {
+                $order->seller->notify(new \App\Notifications\NewOrderNotification($order));
+            }
 
             return response()->json(['status' => 'confirmed']);
         }

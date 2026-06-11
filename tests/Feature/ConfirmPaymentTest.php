@@ -14,7 +14,10 @@ class ConfirmPaymentTest extends TestCase
 
     public function test_confirm_payment_marks_transaction_and_orders_as_paid(): void
     {
+        \Illuminate\Support\Facades\Notification::fake();
+
         $buyer = User::factory()->create();
+        $seller = User::factory()->create();
 
         $transaction = Transaction::create([
             'buyer_id' => $buyer->id,
@@ -26,7 +29,7 @@ class ConfirmPaymentTest extends TestCase
         $order = Order::create([
             'transaction_id' => $transaction->id,
             'buyer_id' => $buyer->id,
-            'seller_id' => $buyer->id,
+            'seller_id' => $seller->id,
             'total_price' => 100000,
             'shipping_courier' => 'jne',
             'shipping_service' => 'REG',
@@ -50,6 +53,10 @@ class ConfirmPaymentTest extends TestCase
             'id' => $order->id,
             'status' => 'paid',
         ]);
+
+        \Illuminate\Support\Facades\Notification::assertSentTo(
+            [$seller], \App\Notifications\NewOrderNotification::class
+        );
     }
 
     public function test_confirm_payment_skips_already_paid_transaction(): void
