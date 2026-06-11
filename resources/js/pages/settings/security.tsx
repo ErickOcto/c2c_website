@@ -64,7 +64,7 @@ export default function Security({
                 />
 
                 <Form
-                    {...SecurityController.update.put()}
+                    {...SecurityController.update.form.put()}
                     options={{
                         preserveScroll: true,
                     }}
@@ -178,7 +178,7 @@ export default function Security({
                             </p>
 
                             <div className="relative inline">
-                                <Form {...disable.delete()}>
+                                <Form {...disable.form.delete()}>
                                     {({ processing }) => (
                                         <Button
                                             variant="destructive"
@@ -216,7 +216,7 @@ export default function Security({
                                     </Button>
                                 ) : (
                                     <Form
-                                        {...enable.post()}
+                                        {...enable.form.post()}
                                         onSuccess={() =>
                                             setShowSetupModal(true)
                                         }
