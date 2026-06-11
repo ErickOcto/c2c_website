@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 use Modules\Order\Models\Order;
@@ -45,7 +46,15 @@ class OrderController extends Controller
     {
         $request->validate([
             'status' => ['required', 'in:paid,shipped,completed,cancelled'],
-            'tracking_number' => ['required_if:status,shipped', 'nullable', 'string', 'max:100'],
+            'tracking_number' => [
+                'required_if:status,shipped',
+                'nullable',
+                'string',
+                'max:100',
+                Rule::unique('shippings', 'tracking_number')->ignore($order->id, 'order_id'),
+            ],
+        ], [
+            'tracking_number.unique' => 'This tracking number is already used for another shipment.',
         ]);
 
         $newStatus = $request->input('status');
