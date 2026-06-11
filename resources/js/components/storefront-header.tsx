@@ -10,7 +10,8 @@ import {
     MessageCircle,
     User,
     LogIn,
-    Check} from 'lucide-react';
+    Check,
+    ShieldCheck} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -72,7 +73,7 @@ const brands = [
 export function StorefrontHeader() {
     const { auth, cartItemCount, wishlistItemCount, unreadMessagesCount } = usePage<{
         auth: { 
-            user: { id: number; name: string; email: string; avatar?: string } | null;
+            user: { id: number; name: string; email: string; avatar?: string; role?: string; is_admin?: boolean } | null;
             unreadNotificationsCount: number;
             recentNotifications: any[];
         };
@@ -381,6 +382,14 @@ export function StorefrontHeader() {
                                                 Dashboard
                                             </Link>
                                         </DropdownMenuItem>
+                                        {(auth.user.role === 'admin' || auth.user.is_admin) && (
+                                            <DropdownMenuItem asChild>
+                                                <Link href="/admin/dashboard">
+                                                    <ShieldCheck className="h-4 w-4 mr-2 text-primary" />
+                                                    Admin Dashboard
+                                                </Link>
+                                            </DropdownMenuItem>
+                                        )}
                                         <DropdownMenuItem asChild>
                                             <Link href="/cart">
                                                 <ShoppingBag className="h-4 w-4 mr-2" />

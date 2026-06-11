@@ -7,6 +7,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -22,7 +23,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Vintage Vogue Shop', 'email' => 'vogue@mail.com', 'password' => Hash::make('password'), 'role' => 'seller'],
             ['name' => 'Preloved Palace', 'email' => 'palace@mail.com', 'password' => Hash::make('password'), 'role' => 'seller'],
             ['name' => 'FashionFinder', 'email' => 'finder@mail.com', 'password' => Hash::make('password'), 'role' => 'buyer'],
-            ['name' => 'Admin', 'email' => 'admin@mail.com', 'password' => Hash::make('password'), 'role' => 'admin'],
+            ['name' => 'Admin', 'email' => 'admin@mail.com', 'password' => Hash::make('password'), 'role' => 'admin', 'is_admin' => true],
         ]);
 
         DB::table('categories')->insert([
@@ -48,8 +49,8 @@ class DatabaseSeeder extends Seeder
             $city = $cities[$i - 1];
             DB::table('profiles')->insert([
                 'user_id' => $i,
-                'phone' => '08123' . $i,
-                'address' => 'Jl. Test No. ' . $i,
+                'phone' => '08123'.$i,
+                'address' => 'Jl. Test No. '.$i,
                 'city' => $city['name'],
                 'city_id' => $city['id'],
                 'province_id' => $city['province_id'],
@@ -59,7 +60,7 @@ class DatabaseSeeder extends Seeder
         }
 
         /** @var array<int, array{name: string, description: string, price: int, brand: string, condition: string, size: string, color: string, material: string, category_id: int, user_id: int}> $products */
-                $products = [
+        $products = [
             [
                 'name' => 'Slim Fit Green Denim Jacket',
                 'description' => 'High quality Slim Fit Green Denim Jacket by Vans. Perfect for your everyday look. Comfortable and stylish.',
@@ -527,11 +528,11 @@ class DatabaseSeeder extends Seeder
         for ($i = 1; $i <= count($products); $i++) {
             DB::table('product_images')->insert([
                 'product_id' => $i,
-                'image_url' => 'https://loremflickr.com/600/800/fashion,clothing?random=' . ($i * 2 - 1),
+                'image_url' => 'https://loremflickr.com/600/800/fashion,clothing?random='.($i * 2 - 1),
             ]);
             DB::table('product_images')->insert([
                 'product_id' => $i,
-                'image_url' => 'https://loremflickr.com/600/800/fashion,clothing?random=' . ($i * 2),
+                'image_url' => 'https://loremflickr.com/600/800/fashion,clothing?random='.($i * 2),
             ]);
         }
 
@@ -614,7 +615,7 @@ class DatabaseSeeder extends Seeder
 
         for ($i = 1; $i <= 5; $i++) {
             DB::table('notifications')->insert([
-                'id' => \Illuminate\Support\Str::uuid(),
+                'id' => Str::uuid(),
                 'type' => 'App\Notifications\SystemNotification',
                 'notifiable_type' => 'App\Models\User',
                 'notifiable_id' => 1,
