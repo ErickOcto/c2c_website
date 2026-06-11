@@ -1,4 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,8 +20,17 @@ import {
     Trash2,
     BarChart3,
     AlertCircle,
+    AlertTriangle,
 } from 'lucide-react';
 import { AdminLayout } from '@/layouts/admin-layout';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 
 type Report = {
     id: number;
@@ -61,6 +71,8 @@ const statusTabs = [
 ];
 
 export default function AdminReports({ reports, filters }: Props) {
+    const [reportToResolve, setReportToResolve] = useState<Report | null>(null);
+    const [resolving, setResolving] = useState(false);
 
     function handleStatusUpdate(report: Report, status: string) {
         router.patch(`/admin/reports/${report.id}/status`, { status }, {
@@ -70,12 +82,17 @@ export default function AdminReports({ reports, filters }: Props) {
         });
     }
 
-    function handleRemoveProduct(report: Report) {
-        if (!window.confirm(`Remove "${report.product?.name}"? This will deactivate the listing and resolve the report.`)) return;
-        router.post(`/admin/reports/${report.id}/remove-product`, {}, {
+    function confirmRemoveProduct() {
+        if (!reportToResolve) return;
+        setResolving(true);
+        router.post(`/admin/reports/${reportToResolve.id}/remove-product`, {}, {
             preserveScroll: true,
-            onSuccess: () => toast.success('Product removed and report resolved.'),
+            onSuccess: () => {
+                toast.success('Product removed and report resolved.');
+                setReportToResolve(null);
+            },
             onError: () => toast.error('Failed to remove product.'),
+            onFinish: () => setResolving(false),
         });
     }
 
@@ -87,6 +104,85 @@ export default function AdminReports({ reports, filters }: Props) {
     return (
         <AdminLayout title="Report Management" activePath="/admin/reports">
             <Head title="Report Management — Admin" />
+
+            {/* Remove Product Confirmation Modal */}
+            <Dialog open={!!reportToResolve} onOpenChange={(open) => !open && setReportToResolve(null)}>
+                <DialogContent className="sm:max-w-lg overflow-hidden border border-red-100 dark:border-red-900/30 p-0 shadow-2xl">
+                    {/* Top Accent Gradient Line */}
+                    <div className="h-1.5 w-full bg-gradient-to-r from-red-500 via-rose-500 to-amber-500" />
+                    
+                    <div className="p-6 space-y-6">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/40 text-red-600 dark:text-red-400 mb-4 shadow-inner ring-4 ring-red-50/50 dark:ring-red-950/10">
+                                <Trash2 className="h-7 w-7 animate-pulse" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-foreground tracking-tight">
+                                Remove Listing & Resolve Report
+                            </h3>
+                            <p className="text-sm text-muted-foreground mt-1.5 max-w-sm">
+                                You are about to remove this product listing. Please verify the details below before proceeding.
+                            </p>
+                        </div>
+
+                        {/* Product & Seller Info Card */}
+                        {reportToResolve && reportToResolve.product && (
+                            <div className="rounded-xl border border-muted/80 bg-muted/30 p-4 space-y-3">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="min-w-0">
+                                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Product Title</p>
+                                        <p className="font-semibold text-sm text-foreground truncate mt-0.5">{reportToResolve.product.name}</p>
+                                    </div>
+                                    <Badge variant="outline" className="text-[10px] bg-background capitalize shrink-0">
+                                        Status: {reportToResolve.product.status}
+                                    </Badge>
+                                </div>
+                                <div className="border-t border-muted/60 pt-2 flex justify-between text-xs">
+                                    <div>
+                                        <span className="text-muted-foreground">Seller:</span>{' '}
+                                        <span className="font-medium text-foreground">{reportToResolve.product.seller?.name ?? 'Unknown'}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-muted-foreground">Report Reason:</span>{' '}
+                                        <span className="font-medium text-red-600 dark:text-red-400">{reportToResolve.reason}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Consequences Callout */}
+                        <div className="rounded-xl border border-red-100 bg-red-50/50 p-4 dark:border-red-950/30 dark:bg-red-950/10 space-y-2">
+                            <h4 className="text-xs font-semibold text-red-800 dark:text-red-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <AlertTriangle className="h-3.5 w-3.5" />
+                                Action Consequences
+                            </h4>
+                            <ul className="text-xs text-red-700/80 dark:text-red-300/80 space-y-1 list-disc pl-4 leading-relaxed">
+                                <li>The product listing will be immediately deactivated and hidden from the marketplace.</li>
+                                <li>The report status will be updated to "Resolved".</li>
+                                <li>The seller will be notified that their listing was removed due to policy violations.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <DialogFooter className="px-6 py-4 bg-muted/30 border-t flex flex-col-reverse sm:flex-row gap-2 sm:gap-0 justify-end">
+                        <Button
+                            variant="outline"
+                            onClick={() => setReportToResolve(null)}
+                            disabled={resolving}
+                            className="w-full sm:w-auto font-medium transition-colors hover:bg-muted"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={confirmRemoveProduct}
+                            disabled={resolving}
+                            className="w-full sm:w-auto font-medium shadow-sm bg-red-600 hover:bg-red-700 active:bg-red-800 border-red-700 hover:border-red-800 text-white dark:bg-red-700 dark:hover:bg-red-600"
+                        >
+                            {resolving ? 'Removing...' : 'Confirm Removal'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <div className="space-y-5">
                 {/* Status Summary */}
@@ -230,7 +326,7 @@ export default function AdminReports({ reports, filters }: Props) {
                                                                 size="sm"
                                                                 variant="outline"
                                                                 className="text-red-600 border-red-200 hover:bg-red-50 dark:hover:bg-red-950/30"
-                                                                onClick={() => handleRemoveProduct(report)}
+                                                                onClick={() => setReportToResolve(report)}
                                                             >
                                                                 <Trash2 className="h-3.5 w-3.5 mr-1" />
                                                                 Remove

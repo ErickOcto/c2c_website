@@ -21,9 +21,18 @@ import {
     ShieldCheck,
     Users,
     UserCheck,
+    AlertTriangle,
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { AdminLayout } from '@/layouts/admin-layout';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 
 type User = {
     id: number;
@@ -63,12 +72,24 @@ export default function AdminUsers({ users, filters }: Props) {
         router.get('/admin/users', { q: search }, { preserveScroll: true });
     }
 
+    const [userToBan, setUserToBan] = useState<User | null>(null);
+    const [banning, setBanning] = useState(false);
+
     function handleBan(user: User) {
-        if (!window.confirm(`Ban "${user.name}"? They will lose access to the platform.`)) return;
-        router.patch(`/admin/users/${user.id}/ban`, {}, {
+        setUserToBan(user);
+    }
+
+    function confirmBan() {
+        if (!userToBan) return;
+        setBanning(true);
+        router.patch(`/admin/users/${userToBan.id}/ban`, {}, {
             preserveScroll: true,
-            onSuccess: () => toast.success(`${user.name} has been banned.`),
+            onSuccess: () => {
+                toast.success(`${userToBan.name} has been banned.`);
+                setUserToBan(null);
+            },
             onError: () => toast.error('Failed to ban user.'),
+            onFinish: () => setBanning(false),
         });
     }
 
@@ -85,6 +106,83 @@ export default function AdminUsers({ users, filters }: Props) {
     return (
         <AdminLayout title="User Management" activePath="/admin/users">
             <Head title="User Management — Admin" />
+
+            {/* Ban Confirmation Modal */}
+            <Dialog open={!!userToBan} onOpenChange={(open) => !open && setUserToBan(null)}>
+                <DialogContent className="sm:max-w-lg overflow-hidden border border-red-100 dark:border-red-900/30 p-0 shadow-2xl">
+                    {/* Top Accent Gradient Line */}
+                    <div className="h-1.5 w-full bg-gradient-to-r from-red-500 via-rose-500 to-amber-500" />
+                    
+                    <div className="p-6 space-y-6">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/40 text-red-600 dark:text-red-400 mb-4 shadow-inner ring-4 ring-red-50/50 dark:ring-red-950/10">
+                                <Ban className="h-7 w-7 animate-pulse" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-foreground tracking-tight">
+                                Restrict User Access
+                            </h3>
+                            <p className="text-sm text-muted-foreground mt-1.5 max-w-sm">
+                                You are about to ban this user. Please confirm the identity and the consequences of this action.
+                            </p>
+                        </div>
+
+                        {/* User Profile Preview Card */}
+                        {userToBan && (
+                            <div className="rounded-xl border border-muted/80 bg-muted/30 p-4 flex items-center gap-4 transition-all duration-200 hover:bg-muted/50">
+                                <Avatar className="h-12 w-12 shrink-0 border border-muted/80 ring-2 ring-background">
+                                    <AvatarFallback className="text-sm bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400 font-bold">
+                                        {userToBan.name.charAt(0).toUpperCase()}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div className="min-w-0 flex-1">
+                                    <p className="font-semibold text-sm text-foreground truncate">{userToBan.name}</p>
+                                    <p className="text-xs text-muted-foreground truncate">{userToBan.email}</p>
+                                    <div className="flex items-center gap-1.5 mt-1">
+                                        <Badge variant="outline" className="text-[10px] py-0 px-1.5 bg-background">
+                                            Role: {userToBan.is_admin ? 'Admin' : (userToBan.role.charAt(0).toUpperCase() + userToBan.role.slice(1))}
+                                        </Badge>
+                                        <Badge variant="outline" className="text-[10px] py-0 px-1.5 bg-background text-red-500 border-red-200">
+                                            Pending Ban
+                                        </Badge>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Consequences Alert Callout */}
+                        <div className="rounded-xl border border-red-100 bg-red-50/50 p-4 dark:border-red-950/30 dark:bg-red-950/10 space-y-2">
+                            <h4 className="text-xs font-semibold text-red-800 dark:text-red-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <AlertTriangle className="h-3.5 w-3.5" />
+                                Action Consequences
+                            </h4>
+                            <ul className="text-xs text-red-700/80 dark:text-red-300/80 space-y-1 list-disc pl-4 leading-relaxed">
+                                <li>The user's active session will be terminated immediately.</li>
+                                <li>All active product listings for this user will be suspended.</li>
+                                <li>They will no longer be able to log in, purchase, or list products.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <DialogFooter className="px-6 py-4 bg-muted/30 border-t flex flex-col-reverse sm:flex-row gap-2 sm:gap-0 justify-end">
+                        <Button
+                            variant="outline"
+                            onClick={() => setUserToBan(null)}
+                            disabled={banning}
+                            className="w-full sm:w-auto font-medium transition-colors hover:bg-muted"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={confirmBan}
+                            disabled={banning}
+                            className="w-full sm:w-auto font-medium shadow-sm bg-red-600 hover:bg-red-700 active:bg-red-800 border-red-700 hover:border-red-800 text-white dark:bg-red-700 dark:hover:bg-red-600"
+                        >
+                            {banning ? 'Restricting...' : 'Confirm Restriction'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <div className="space-y-5">
                 {/* Summary Cards */}
