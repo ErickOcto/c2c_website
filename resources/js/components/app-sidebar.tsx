@@ -1,7 +1,7 @@
 import * as React from "react"
 
 import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
+
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
@@ -62,29 +62,7 @@ const data = {
       ),
     },
   ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: (
-        <HugeiconsIcon icon={Settings05Icon} strokeWidth={2} />
-      ),
-    },
-    {
-      title: "Get Help",
-      url: "/help",
-      icon: (
-        <HugeiconsIcon icon={HelpCircleIcon} strokeWidth={2} />
-      ),
-    },
-    {
-      title: "Search",
-      url: "/search",
-      icon: (
-        <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
-      ),
-    },
-  ],
+
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -115,7 +93,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <NavMain items={data.sellerNav} />
         </SidebarGroup>
 
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={auth?.user ?? { name: 'User', email: 'user@example.com', avatar: '' }} />
