@@ -146,7 +146,7 @@ export default function CartPage({ cartItems }: Props) {
                                                             {formatPrice(
                                                                 (item.product?.price ??
                                                                     0) *
-                                                                    item.quantity,
+                                                                item.quantity,
                                                             )}
                                                         </p>
                                                         <Button

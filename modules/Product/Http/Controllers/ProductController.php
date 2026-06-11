@@ -3,6 +3,7 @@
 namespace Modules\Product\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -152,6 +153,26 @@ class ProductController extends Controller
             'products' => $products,
             'categories' => $categories,
             'filters' => $request->only(['q', 'department', 'category', 'condition', 'min_price', 'max_price', 'size', 'brand', 'sort']),
+        ]);
+    }
+
+    /**
+     * Display a seller's shop profile.
+     */
+    public function shop(Request $request, User $user): Response
+    {
+        $user->load('profile');
+
+        $query = Product::with(['images', 'category', 'seller.profile', 'reviews'])
+            ->where('user_id', $user->id)
+            ->where('status', 'active')
+            ->latest();
+
+        $products = $query->paginate(12)->withQueryString();
+
+        return Inertia::render('shops/show', [
+            'seller' => $user,
+            'products' => $products,
         ]);
     }
 }

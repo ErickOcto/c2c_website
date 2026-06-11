@@ -55,6 +55,8 @@ export default function ProfilePage({
     // Rajaongkir Dropdown States
     const [provinces, setProvinces] = useState<{province_id: string, province: string}[]>([]);
     const [cities, setCities] = useState<{city_id: string, city_name: string, type: string}[]>([]);
+    const [isLoadingProvinces, setIsLoadingProvinces] = useState(true);
+    const [isLoadingCities, setIsLoadingCities] = useState(false);
     const [selectedProvinceId, setSelectedProvinceId] = useState<string>(profile?.province_id?.toString() ?? '');
     const [selectedCityId, setSelectedCityId] = useState<string>(profile?.city_id?.toString() ?? '');
     const [selectedProvinceName, setSelectedProvinceName] = useState<string>(profile?.province_name ?? '');
@@ -64,18 +66,30 @@ export default function ProfilePage({
     const dob = profile?.date_of_birth ? profile.date_of_birth.split('T')[0] : '';
 
     useEffect(() => {
+        setIsLoadingProvinces(true);
         fetch('/api/shipping/provinces', { headers: { Accept: 'application/json' } })
             .then((res) => res.json())
-            .then((data) => setProvinces(data.provinces || []))
-            .catch(() => {});
+            .then((data) => {
+                setProvinces(data.provinces || []);
+                setIsLoadingProvinces(false);
+            })
+            .catch(() => {
+                setIsLoadingProvinces(false);
+            });
     }, []);
 
     useEffect(() => {
         if (selectedProvinceId) {
+            setIsLoadingCities(true);
             fetch(`/api/shipping/cities?province_id=${selectedProvinceId}`, { headers: { Accept: 'application/json' } })
                 .then((res) => res.json())
-                .then((data) => setCities(data.cities || []))
-                .catch(() => {});
+                .then((data) => {
+                    setCities(data.cities || []);
+                    setIsLoadingCities(false);
+                })
+                .catch(() => {
+                    setIsLoadingCities(false);
+                });
         } else {
             setCities([]);
         }
@@ -280,10 +294,10 @@ export default function ProfilePage({
                                 }}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder={provinces.length > 0 ? "Select province" : "Loading provinces..."} />
+                                    <SelectValue placeholder={isLoadingProvinces ? "Loading provinces..." : (provinces.length > 0 ? "Select province" : "No provinces available")} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {provinces.length === 0 && (
+                                    {!isLoadingProvinces && provinces.length === 0 && (
                                         <div className="p-2 text-sm text-muted-foreground text-center">
                                             No provinces available. Check API key.
                                         </div>
@@ -310,10 +324,10 @@ export default function ProfilePage({
                                 disabled={!selectedProvinceId}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder={!selectedProvinceId ? 'Select a province first' : (cities.length > 0 ? 'Select city' : 'Loading cities...')} />
+                                    <SelectValue placeholder={!selectedProvinceId ? 'Select a province first' : (isLoadingCities ? 'Loading cities...' : (cities.length > 0 ? 'Select city' : 'No cities available'))} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {cities.length === 0 && selectedProvinceId && (
+                                    {!isLoadingCities && cities.length === 0 && selectedProvinceId && (
                                         <div className="p-2 text-sm text-muted-foreground text-center">
                                             No cities available.
                                         </div>
