@@ -31,8 +31,6 @@ import {
 } from "@/components/ui/sidebar"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { MoreVerticalCircle01Icon, Settings05Icon, HelpCircleIcon, Logout01Icon } from "@hugeicons/core-free-icons"
-
-import { Link } from "@inertiajs/react"
 import { ShieldCheck } from "lucide-react"
 
 export function NavUser({
@@ -101,13 +99,6 @@ export function NavUser({
                   </Link>
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem>
-                <HugeiconsIcon icon={UserCircle02Icon} strokeWidth={2} />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <HugeiconsIcon icon={CreditCardIcon} strokeWidth={2} />
-                Billing
               <DropdownMenuItem asChild>
                 <Link href="/settings" className="cursor-pointer">
                   <HugeiconsIcon icon={Settings05Icon} strokeWidth={2} />
