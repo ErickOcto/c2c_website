@@ -21,6 +21,9 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react"
 import { MoreVerticalCircle01Icon, UserCircle02Icon, CreditCardIcon, Notification03Icon, Logout01Icon } from "@hugeicons/core-free-icons"
 
+import { Link } from "@inertiajs/react"
+import { ShieldCheck } from "lucide-react"
+
 export function NavUser({
   user,
 }: {
@@ -28,6 +31,8 @@ export function NavUser({
     name: string
     email: string
     avatar: string
+    role?: string
+    is_admin?: boolean
   }
 }) {
   const { isMobile } = useSidebar()
@@ -76,6 +81,14 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              {(user.role === 'admin' || user.is_admin) && (
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/dashboard" className="w-full flex items-center">
+                    <ShieldCheck className="h-4 w-4 mr-2 text-primary" />
+                    Admin Dashboard
+                  </Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem>
                 <HugeiconsIcon icon={UserCircle02Icon} strokeWidth={2} />
                 Account
