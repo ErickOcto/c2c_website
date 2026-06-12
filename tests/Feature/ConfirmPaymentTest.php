@@ -3,7 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Notifications\NewOrderNotification;
+use App\Notifications\SystemNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Modules\Order\Models\Order;
 use Modules\Transaction\Models\Transaction;
 use Tests\TestCase;
@@ -14,7 +17,7 @@ class ConfirmPaymentTest extends TestCase
 
     public function test_confirm_payment_marks_transaction_and_orders_as_paid(): void
     {
-        \Illuminate\Support\Facades\Notification::fake();
+        Notification::fake();
 
         $buyer = User::factory()->create();
         $seller = User::factory()->create();
@@ -54,8 +57,12 @@ class ConfirmPaymentTest extends TestCase
             'status' => 'paid',
         ]);
 
-        \Illuminate\Support\Facades\Notification::assertSentTo(
-            [$seller], \App\Notifications\NewOrderNotification::class
+        Notification::assertSentTo(
+            [$seller], NewOrderNotification::class
+        );
+
+        Notification::assertSentTo(
+            [$buyer], SystemNotification::class
         );
     }
 

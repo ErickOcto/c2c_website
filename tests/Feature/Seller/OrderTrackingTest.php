@@ -3,7 +3,9 @@
 namespace Tests\Feature\Seller;
 
 use App\Models\User;
+use App\Notifications\SystemNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Modules\Order\Models\Order;
 use Modules\Shipping\Models\Shipping;
 use Modules\Transaction\Models\Transaction;
@@ -64,6 +66,8 @@ class OrderTrackingTest extends TestCase
 
     public function test_seller_can_ship_order_with_unique_tracking_number(): void
     {
+        Notification::fake();
+
         $response = $this->actingAs($this->seller)
             ->patch(route('seller.orders.update-status', $this->order1->id), [
                 'status' => 'shipped',
@@ -78,6 +82,10 @@ class OrderTrackingTest extends TestCase
             'tracking_number' => 'TRACK12345',
             'status' => 'shipped',
         ]);
+
+        Notification::assertSentTo(
+            [$this->order1->buyer], SystemNotification::class
+        );
     }
 
     public function test_seller_cannot_ship_order_with_duplicate_tracking_number(): void

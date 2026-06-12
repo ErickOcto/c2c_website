@@ -5,6 +5,8 @@ namespace Modules\Order\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Profile;
 use App\Models\User;
+use App\Notifications\NewOrderNotification;
+use App\Notifications\SystemNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -313,7 +315,12 @@ class CheckoutController extends Controller
             $transaction->orders()->where('status', 'pending')->update(['status' => 'paid']);
 
             foreach ($pendingOrders as $order) {
-                $order->seller->notify(new \App\Notifications\NewOrderNotification($order));
+                $order->seller->notify(new NewOrderNotification($order));
+                $order->buyer->notify(new SystemNotification(
+                    'Checkout Successful! 🛍️',
+                    'Your payment of Rp '.number_format($order->total_price, 0, ',', '.').' for Order #'.$order->id.' has been confirmed. The seller ('.$order->seller->name.') has been notified to process your package.',
+                    '/dashboard'
+                ));
             }
 
             return response()->json(['status' => 'confirmed']);
@@ -339,7 +346,12 @@ class CheckoutController extends Controller
             $transaction->orders()->where('status', 'pending')->update(['status' => 'paid']);
 
             foreach ($pendingOrders as $order) {
-                $order->seller->notify(new \App\Notifications\NewOrderNotification($order));
+                $order->seller->notify(new NewOrderNotification($order));
+                $order->buyer->notify(new SystemNotification(
+                    'Checkout Successful! 🛍️',
+                    'Your payment of Rp '.number_format($order->total_price, 0, ',', '.').' for Order #'.$order->id.' has been confirmed. The seller ('.$order->seller->name.') has been notified to process your package.',
+                    '/dashboard'
+                ));
             }
 
             return response()->json(['status' => 'confirmed']);

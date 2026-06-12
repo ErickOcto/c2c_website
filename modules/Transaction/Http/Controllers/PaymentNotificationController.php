@@ -3,6 +3,8 @@
 namespace Modules\Transaction\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Notifications\NewOrderNotification;
+use App\Notifications\SystemNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -68,9 +70,9 @@ class PaymentNotificationController extends Controller
 
         // Verify the signature key
         $signatureKey = hash('sha512',
-            $orderId .
-            $notification->status_code .
-            $notification->gross_amount .
+            $orderId.
+            $notification->status_code.
+            $notification->gross_amount.
             config('midtrans.server_key')
         );
 
@@ -145,7 +147,17 @@ class PaymentNotificationController extends Controller
             'paid_at' => now(),
         ]);
 
-        $transaction->orders()->update(['status' => 'paid']);
+        $pendingOrders = $transaction->orders()->where('status', 'pending')->with(['seller', 'buyer'])->get();
+        $transaction->orders()->where('status', 'pending')->update(['status' => 'paid']);
+
+        foreach ($pendingOrders as $order) {
+            $order->seller->notify(new NewOrderNotification($order));
+            $order->buyer->notify(new SystemNotification(
+                'Checkout Successful! 🛍️',
+                'Your payment of Rp '.number_format($order->total_price, 0, ',', '.').' for Order #'.$order->id.' has been confirmed. The seller ('.$order->seller->name.') has been notified to process your package.',
+                '/dashboard'
+            ));
+        }
 
         Log::info('Midtrans: Transaction marked as paid', [
             'transaction_id' => $transaction->id,
@@ -158,7 +170,17 @@ class PaymentNotificationController extends Controller
     private function markAsCancelled(Transaction $transaction): void
     {
         $transaction->update(['payment_status' => 'cancelled']);
-        $transaction->orders()->update(['status' => 'cancelled']);
+
+        $pendingOrders = $transaction->orders()->whereIn('status', ['pending', 'paid'])->with(['seller', 'buyer'])->get();
+        $transaction->orders()->whereIn('status', ['pending', 'paid'])->update(['status' => 'cancelled']);
+
+        foreach ($pendingOrders as $order) {
+            $order->buyer->notify(new SystemNotification(
+                'Order Cancelled ❌',
+                'Your order #'.$order->id.' has been cancelled.',
+                '/dashboard'
+            ));
+        }
 
         Log::info('Midtrans: Transaction cancelled', [
             'transaction_id' => $transaction->id,
@@ -171,7 +193,17 @@ class PaymentNotificationController extends Controller
     private function markAsExpired(Transaction $transaction): void
     {
         $transaction->update(['payment_status' => 'expired']);
-        $transaction->orders()->update(['status' => 'cancelled']);
+
+        $pendingOrders = $transaction->orders()->whereIn('status', ['pending', 'paid'])->with(['seller', 'buyer'])->get();
+        $transaction->orders()->whereIn('status', ['pending', 'paid'])->update(['status' => 'cancelled']);
+
+        foreach ($pendingOrders as $order) {
+            $order->buyer->notify(new SystemNotification(
+                'Order Cancelled (Expired) ❌',
+                'Your order #'.$order->id.' has been cancelled due to payment expiration.',
+                '/dashboard'
+            ));
+        }
 
         Log::info('Midtrans: Transaction expired', [
             'transaction_id' => $transaction->id,

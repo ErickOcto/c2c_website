@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Seller;
 
 use App\Http\Controllers\Controller;
+use App\Notifications\SystemNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
@@ -70,6 +71,28 @@ class OrderController extends Controller
                     'status' => 'shipped',
                 ]
             );
+        }
+
+        // Notify the buyer of order status changes
+        if ($newStatus === 'shipped') {
+            $trackingNumber = $request->input('tracking_number') ?? 'N/A';
+            $order->buyer->notify(new SystemNotification(
+                'Package On The Way! 🚚',
+                'Your package for Order #'.$order->id.' has been shipped via '.strtoupper($order->shipping_courier ?? '').' ('.($order->shipping_service ?? 'Standard').'). Tracking number: '.$trackingNumber.'.',
+                '/dashboard'
+            ));
+        } elseif ($newStatus === 'completed') {
+            $order->buyer->notify(new SystemNotification(
+                'Order Completed! 🎉',
+                'Your package for Order #'.$order->id.' from '.$order->seller->name.' has been delivered successfully. Thank you for shopping with us!',
+                '/dashboard'
+            ));
+        } elseif ($newStatus === 'cancelled') {
+            $order->buyer->notify(new SystemNotification(
+                'Order Cancelled ❌',
+                'Your order #'.$order->id.' has been cancelled.',
+                '/dashboard'
+            ));
         }
 
         return back()->with('status', 'Order status updated successfully.');

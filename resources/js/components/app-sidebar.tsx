@@ -25,6 +25,7 @@ import {
   Package01Icon,
   DeliveryTruck01Icon,
   AnalyticsUpIcon,
+  Notification01Icon,
 } from "@hugeicons/core-free-icons"
 import { Link, usePage } from "@inertiajs/react"
 import AppLogo from "./app-logo"
@@ -67,6 +68,25 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { auth } = usePage().props as any;
+  const unreadCount = auth?.unreadNotificationsCount ?? 0;
+
+  const mainNav = React.useMemo(() => [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: (
+        <HugeiconsIcon icon={DashboardSquare01Icon} strokeWidth={2} />
+      ),
+    },
+    {
+      title: "Notifications",
+      url: "/notifications",
+      icon: (
+        <HugeiconsIcon icon={Notification01Icon} strokeWidth={2} />
+      ),
+      badge: unreadCount > 0 ? unreadCount : undefined,
+    },
+  ], [unreadCount]);
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -85,7 +105,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={mainNav} />
 
         {/* Seller Section */}
         <SidebarGroup>
